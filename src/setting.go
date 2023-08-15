@@ -83,7 +83,9 @@ func (s *Setting) HandleClick() {
 	s.cursor++
 	if s.cursor >= s.len {
 		s.active = false
+		return
 	}
+	encoder.device.SetValue(int(s.value[s.cursor]))
 }
 
 func (s *Setting) HandleChange(value int) int {

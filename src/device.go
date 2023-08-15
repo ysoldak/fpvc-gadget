@@ -84,11 +84,21 @@ func (d *Device) Open() {
 				}
 				return
 			}
+
+			display.Clear(10, 20+int16(d.cursor)*10, ">")
+			display.Print(10, 20+int16(d.cursor)*10, "*")
+			display.device.Display()
+
 			setting := d.settings[d.cursor]
 			setting.Open()
 			for i := byte(0); i < setting.len; i++ {
 				d.eeprom[setting.address+i] = setting.value[i]
 			}
+
+			display.Clear(10, 20+int16(d.cursor)*10, "*")
+			display.Print(10, 20+int16(d.cursor)*10, ">")
+			display.device.Display()
+
 			encoder.SetClickHandler(d.HandleClick)
 			encoder.SetChangeHandler(d.HandleChange)
 			encoder.device.SetValue(d.cursor)
@@ -188,8 +198,8 @@ func (d *Device) Get(send bool) error {
 	d.settings = append(d.settings, Setting{
 		address:        100,
 		value:          make([]byte, 10),
-		min:            'a',
-		max:            'Z',
+		min:            ' ',
+		max:            'z',
 		len:            10,
 		kind:           SettingKindByte,
 		show:           SettingShowChar,
