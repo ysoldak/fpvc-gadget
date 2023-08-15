@@ -67,6 +67,7 @@ func (s *Scan) Open() {
 			s.redraw = true
 			s.cursor = 0
 			s.cursorPrev = -1
+			s.devices = []*Device{}
 
 			s.Show()
 

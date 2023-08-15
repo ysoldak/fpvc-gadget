@@ -23,8 +23,8 @@ func main() {
 	go encoder.Run()
 
 	scan = &Scan{}
-	scan.devices = append(scan.devices, &Device{id: 0xB2, name: "Bob"})
-	scan.devices = append(scan.devices, &Device{id: 0xD4, name: "Dude"})
+	// scan.devices = append(scan.devices, &Device{id: 0xB2, name: "Bob"})
+	// scan.devices = append(scan.devices, &Device{id: 0xD4, name: "Dude"})
 
 	scan.Open()
 
