@@ -22,8 +22,9 @@ type Setting struct {
 	address byte
 	value   []byte
 
-	min byte // min value of each byte
-	max byte // max value of each byte
+	min     byte   // min value of each byte
+	max     byte   // max value of each byte
+	invalid []byte // if any of values are invalid and shall be hopped over
 
 	cursor byte
 	len    byte // total length of the value slice
@@ -84,6 +85,29 @@ func (s *Setting) HandleChange(value int) int {
 	if s.kind == SettingKindByte {
 		oldValue := s.value[s.cursor]
 		newValue := byte(value)
+
+		// filter invalid values by hopping over them in the same direction
+		good := false
+		for !good {
+			good = true
+			for _, v := range s.invalid {
+				if newValue == v {
+					good = false
+					if newValue > oldValue {
+						newValue++
+					} else {
+						newValue--
+					}
+					if newValue < s.min {
+						newValue = s.max
+					}
+					if newValue > s.max {
+						newValue = s.min
+					}
+					break
+				}
+			}
+		}
 
 		if newValue < s.min {
 			newValue = s.max

@@ -91,8 +91,13 @@ func (d *Device) Open() {
 
 			setting := d.settings[d.cursor]
 			setting.Open()
-			for i := byte(0); i < setting.len; i++ {
-				d.eeprom[setting.address+i] = setting.value[i]
+			if d.cursor == 0 { // special handling for ID setting
+				d.eeprom[setting.address] = setting.value[0] >> 4
+				d.eeprom[setting.address+1] = setting.value[0] & 0x0F
+			} else {
+				for i := byte(0); i < setting.len; i++ {
+					d.eeprom[setting.address+i] = setting.value[i]
+				}
 			}
 
 			display.Clear(10, 20+int16(d.cursor)*10, "*")
@@ -195,6 +200,28 @@ func (d *Device) Get(send bool) error {
 	copy(d.eeprom, buf[2:112])
 
 	d.settings = []Setting{}
+
+	d.settings = append(d.settings, Setting{
+		address: 64,
+		value:   []byte{(d.eeprom[64] << 4) + d.eeprom[65]},
+		min:     0xA1,
+		max:     0xF9,
+		invalid: []byte{
+			0xA0, 0xAA, 0xAB, 0xAC, 0xAD, 0xAE, 0xAF,
+			0xB0, 0xBA, 0xBB, 0xBC, 0xBD, 0xBE, 0xBF,
+			0xC0, 0xCA, 0xCB, 0xCC, 0xCD, 0xCE, 0xCF,
+			0xD0, 0xDA, 0xDB, 0xDC, 0xDD, 0xDE, 0xDF,
+			0xE0, 0xEA, 0xEB, 0xEC, 0xED, 0xEE, 0xEF,
+			0xF0, 0xFA, 0xFB, 0xFC, 0xFD, 0xFE, 0xFF,
+		},
+		len:            1,
+		kind:           SettingKindByte,
+		show:           SettingShowHex,
+		title:          "ID",
+		position:       0,
+		positionOffset: 20,
+	})
+
 	d.settings = append(d.settings, Setting{
 		address:        100,
 		value:          make([]byte, 10),
@@ -204,10 +231,10 @@ func (d *Device) Get(send bool) error {
 		kind:           SettingKindByte,
 		show:           SettingShowChar,
 		title:          "Name",
-		position:       0,
+		position:       1,
 		positionOffset: 20,
 	})
-	copy(d.settings[0].value, d.eeprom[100:110])
+	copy(d.settings[1].value, d.eeprom[100:110])
 
 	d.settings = append(d.settings, Setting{
 		address:        62,
@@ -218,9 +245,10 @@ func (d *Device) Get(send bool) error {
 		kind:           SettingKindByte,
 		show:           SettingShowDec,
 		title:          "Life",
-		position:       1,
+		position:       2,
 		positionOffset: 20,
 	})
+
 	d.settings = append(d.settings, Setting{
 		address:        63,
 		value:          []byte{d.eeprom[63]},
@@ -230,21 +258,22 @@ func (d *Device) Get(send bool) error {
 		kind:           SettingKindByte,
 		show:           SettingShowDec,
 		title:          "Ammo",
-		position:       2,
-		positionOffset: 20,
-	})
-	d.settings = append(d.settings, Setting{
-		address:        64,
-		value:          []byte{d.eeprom[64]},
-		min:            0xA,
-		max:            0xF,
-		len:            1,
-		kind:           SettingKindByte,
-		show:           SettingShowHex,
-		title:          "Team",
 		position:       3,
 		positionOffset: 20,
 	})
+
+	// d.settings = append(d.settings, Setting{
+	// 	address:        64,
+	// 	value:          []byte{d.eeprom[64]},
+	// 	min:            0xA,
+	// 	max:            0xF,
+	// 	len:            1,
+	// 	kind:           SettingKindByte,
+	// 	show:           SettingShowHex,
+	// 	title:          "Team",
+	// 	position:       3,
+	// 	positionOffset: 20,
+	// })
 	// d.settings = append(d.settings, Setting{
 	// 	address:        65,
 	// 	value:          []byte{d.eeprom[65]},
