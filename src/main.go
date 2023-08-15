@@ -2,7 +2,6 @@ package main
 
 import (
 	"machine"
-	"time"
 )
 
 var display *Display
@@ -27,10 +26,6 @@ func main() {
 	scan.devices = append(scan.devices, &Device{id: 0xB2, name: "Bob"})
 	scan.devices = append(scan.devices, &Device{id: 0xD4, name: "Dude"})
 
-	for {
-		device := scan.Open()
-		device.Open()
-		time.Sleep(time.Second)
-	}
+	scan.Open()
 
 }

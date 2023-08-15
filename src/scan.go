@@ -16,7 +16,7 @@ type Scan struct {
 	active bool
 }
 
-func (s *Scan) Open() *Device {
+func (s *Scan) Open() {
 
 	encoder.SetChangeHandler(nil)
 	encoder.SetClickHandler(nil)
@@ -32,7 +32,7 @@ func (s *Scan) Open() *Device {
 	encoder.SetClickHandler(s.HandleClick)
 
 	i := 0
-	for s.active {
+	for {
 
 		if i%500 == 0 { // every 5 sec
 			serial.uart.WriteByte(0x70)
@@ -54,9 +54,27 @@ func (s *Scan) Open() *Device {
 		time.Sleep(10 * time.Millisecond)
 
 		i++
+
+		if !s.active {
+			device := s.devices[s.cursor]
+			device.Open()
+
+			encoder.SetChangeHandler(nil)
+			encoder.SetClickHandler(nil)
+
+			i = 0
+			s.active = true
+			s.redraw = true
+			s.cursor = 0
+			s.cursorPrev = -1
+
+			s.Show()
+
+			encoder.SetChangeHandler(s.HandleChange)
+			encoder.SetClickHandler(s.HandleClick)
+		}
 	}
 
-	return s.devices[s.cursor]
 }
 
 func (s *Scan) Show() {
@@ -66,12 +84,13 @@ func (s *Scan) Show() {
 			// fmt.Printf("%X | '%s'\r\n", dev.id, string(dev.name))
 			display.Print(10, 10+int16(i)*10, fmt.Sprintf("  %X | %s ", dev.id, dev.name))
 		}
+		display.Print(10, 10+int16(s.cursor)*10, ">")
 		s.redraw = false
 		display.device.Display()
 	}
 	if s.cursorPrev != s.cursor {
-		display.Print(10, 10+int16(s.cursor)*10, ">")
 		display.Clear(10, 10+int16(s.cursorPrev)*10, ">")
+		display.Print(10, 10+int16(s.cursor)*10, ">")
 		s.cursorPrev = s.cursor
 		display.device.Display()
 	}
@@ -106,8 +125,11 @@ func (s *Scan) Receive() {
 		}
 	}
 	if !found {
+		device := NewDevice()
+		device.id = key
+		device.name = string(name)
+		s.devices = append(s.devices, device)
 		s.redraw = true
-		s.devices = append(s.devices, &Device{id: key, name: string(name)})
 	}
 }
 

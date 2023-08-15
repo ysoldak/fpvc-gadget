@@ -19,19 +19,27 @@ var buf []byte = make([]byte, 1000)
 type Device struct {
 	id   byte
 	name string
-	life byte
-	ammo byte
+
+	settings []Setting
 
 	eeprom     []byte
 	eepromPrev []byte
 
-	cursor int
-	active bool
+	cursor  int
+	active  bool
+	changed bool
+}
+
+func NewDevice() *Device {
+	return &Device{
+		settings: []Setting{},
+	}
 }
 
 func (d *Device) Open() {
 
 	d.active = true
+	d.changed = false
 
 	encoder.SetChangeHandler(nil)
 
@@ -58,9 +66,35 @@ func (d *Device) Open() {
 		d.Show()
 		encoder.SetChangeHandler(d.HandleChange)
 		encoder.SetClickHandler(d.HandleClick)
+		encoder.device.SetValue(d.cursor)
 	}
 
-	for d.active {
+	for {
+		if !d.active {
+			if d.cursor == 4 {
+				if d.changed {
+					display.Clear(10, 10, fmt.Sprintf("%X !!!", d.id))
+					display.Print(10, 10, fmt.Sprintf("%X", d.id))
+					err := d.Set()
+					if err != nil {
+						display.Print(10, 10, fmt.Sprintf("%X !!!", d.id))
+						d.active = true
+						continue
+					}
+				}
+				return
+			}
+			if d.cursor >= 2 {
+				setting := d.settings[d.cursor-2]
+				setting.Open()
+				d.eeprom[setting.address] = setting.value // TODO handle more than just a byte
+				encoder.SetClickHandler(d.HandleClick)
+				encoder.SetChangeHandler(d.HandleChange)
+				encoder.device.SetValue(d.cursor)
+				d.active = true
+				d.changed = true
+			}
+		}
 		time.Sleep(100 * time.Millisecond)
 	}
 }
@@ -72,10 +106,12 @@ func (d *Device) Show() {
 
 	display.Print(10, 20, fmt.Sprintf("  ID:   %X", d.id))
 	display.Print(10, 30, fmt.Sprintf("  Name: %s", d.name))
-	display.Print(10, 40, fmt.Sprintf("  Life: %d", d.life))
-	display.Print(10, 50, fmt.Sprintf("  Ammo: %d", d.ammo))
 
-	display.Print(10, 60, "  Back")
+	for _, s := range d.settings {
+		s.Show()
+	}
+
+	display.Print(10, 60, "  Save & Back")
 
 	display.Print(10, 20+int16(d.cursor)*10, ">")
 
@@ -83,10 +119,7 @@ func (d *Device) Show() {
 }
 
 func (d *Device) HandleClick() {
-	if d.cursor == 4 {
-		d.active = false
-	}
-	// TODO handle other positions
+	d.active = false
 }
 
 func (d *Device) HandleChange(value int) int {
@@ -101,7 +134,9 @@ func (d *Device) HandleChange(value int) int {
 	}
 
 	if orig != d.cursor {
-		d.Show()
+		display.Clear(10, 20+int16(orig)*10, ">")
+		display.Print(10, 20+int16(d.cursor)*10, ">")
+		display.device.Display()
 	}
 	return d.cursor
 }
@@ -152,13 +187,23 @@ func (d *Device) Get(send bool) error {
 
 	copy(d.eeprom, buf[2:112])
 
-	println(len(d.eeprom))
-	d.life = d.eeprom[62]
-	println("1")
-	d.ammo = d.eeprom[63]
-
-	println("2")
-	println(len(d.eeprom))
+	d.settings = []Setting{}
+	d.settings = append(d.settings, Setting{
+		address:        62,
+		value:          d.eeprom[62],
+		kind:           SettingKindByte,
+		title:          "Life",
+		position:       2,
+		positionOffset: 20,
+	})
+	d.settings = append(d.settings, Setting{
+		address:        63,
+		value:          d.eeprom[63],
+		kind:           SettingKindByte,
+		title:          "Ammo",
+		position:       3,
+		positionOffset: 20,
+	})
 
 	return nil
 }
@@ -170,8 +215,8 @@ func (d *Device) Set() error {
 	serial.uart.WriteByte(d.id)
 	serial.uart.WriteByte(1)
 	serial.uart.Write(d.eeprom)
-	crc := byte(0)
-	for i := 0; i < 112; i++ {
+	crc := d.id + 1
+	for i := 0; i < 110; i++ {
 		crc += d.eeprom[i]
 	}
 	serial.uart.WriteByte(crc)
