@@ -5,6 +5,7 @@ import (
 	"machine"
 
 	"tinygo.org/x/drivers/ssd1306"
+	"tinygo.org/x/tinydraw"
 	"tinygo.org/x/tinyfont"
 	"tinygo.org/x/tinyfont/proggy"
 )
@@ -37,4 +38,8 @@ func (d *Display) Print(x, y int16, message string) {
 
 func (d *Display) Clear(x, y int16, message string) {
 	tinyfont.WriteLineRotated(&d.device, &proggy.TinySZ8pt7b, x, y, message, BLACK, tinyfont.NO_ROTATION)
+}
+
+func (d *Display) Rect(x, y, w, h int16, color color.RGBA) {
+	tinydraw.FilledRectangle(&d.device, x, y, w, h, color)
 }

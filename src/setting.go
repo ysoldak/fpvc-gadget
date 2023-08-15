@@ -36,7 +36,6 @@ type Setting struct {
 	update   bool
 	active   bool
 
-	oldValue       []byte // TODO remove this field and clear with rect
 	positionOffset byte
 }
 
@@ -44,9 +43,6 @@ func (s *Setting) Open() {
 
 	s.active = true
 	s.cursor = 0
-
-	s.oldValue = make([]byte, s.len)
-	copy(s.oldValue, s.value)
 
 	encoder.SetClickHandler(s.HandleClick)
 	encoder.SetChangeHandler(s.HandleChange)
@@ -63,18 +59,14 @@ func (s *Setting) Open() {
 }
 
 func (s *Setting) Show() {
-	// TODO draw empty rect to cleanup old value
-	//display.Rect(10, int16(s.positionOffset+10*s.position), 30, int16(s.positionOffset+10*s.position)+10, BLACK)
+	display.Rect(30, int16(s.positionOffset+10*(s.position-1)+2), 100, 10, BLACK)
 	switch s.show {
 	case SettingShowDec:
-		display.Clear(10, int16(s.positionOffset+10*s.position), fmt.Sprintf("  %s: %d", s.title, s.oldValue)) // TODO clear with rect
-		display.Print(10, int16(s.positionOffset+10*s.position), fmt.Sprintf("  %s: %d", s.title, s.value))    // TODO support global scroll
+		display.Print(10, int16(s.positionOffset+10*s.position), fmt.Sprintf("  %s: %d", s.title, s.value)) // TODO support global scroll
 	case SettingShowHex:
-		display.Clear(10, int16(s.positionOffset+10*s.position), fmt.Sprintf("  %s: %X", s.title, s.oldValue)) // TODO clear with rect
-		display.Print(10, int16(s.positionOffset+10*s.position), fmt.Sprintf("  %s: %X", s.title, s.value))    // TODO support global scroll
+		display.Print(10, int16(s.positionOffset+10*s.position), fmt.Sprintf("  %s: %X", s.title, s.value)) // TODO support global scroll
 	case SettingShowChar:
-		display.Clear(10, int16(s.positionOffset+10*s.position), fmt.Sprintf("  %s: %s", s.title, string(s.oldValue))) // TODO clear with rect
-		display.Print(10, int16(s.positionOffset+10*s.position), fmt.Sprintf("  %s: %s", s.title, string(s.value)))    // TODO support global scroll
+		display.Print(10, int16(s.positionOffset+10*s.position), fmt.Sprintf("  %s: %s", s.title, string(s.value))) // TODO support global scroll
 	}
 	display.device.Display()
 }
@@ -90,19 +82,20 @@ func (s *Setting) HandleClick() {
 
 func (s *Setting) HandleChange(value int) int {
 	if s.kind == SettingKindByte {
-		orig := s.value[s.cursor]
-		s.value[s.cursor] = byte(value)
-		if s.value[s.cursor] < s.min {
-			s.value[s.cursor] = s.max
+		oldValue := s.value[s.cursor]
+		newValue := byte(value)
+
+		if newValue < s.min {
+			newValue = s.max
 		}
-		if s.value[s.cursor] > s.max {
-			s.value[s.cursor] = s.min
+		if newValue > s.max {
+			newValue = s.min
 		}
-		if orig != s.value[s.cursor] {
-			s.oldValue[s.cursor] = orig
+		if oldValue != newValue {
+			s.value[s.cursor] = newValue
 			s.update = true
 		}
-		return int(s.value[s.cursor])
+		return int(newValue)
 	}
 	return value
 }
