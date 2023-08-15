@@ -12,11 +12,14 @@ type Encoder struct {
 
 	clickHandler  func()
 	changeHandler func(value int) int
+
+	lastClick time.Time
 }
 
 func NewEncoder() *Encoder {
 	return &Encoder{
-		device: rotary_encoder.New(machine.D2, machine.D1),
+		device:    rotary_encoder.New(machine.D2, machine.D1),
+		lastClick: time.Now(),
 	}
 }
 
@@ -29,7 +32,10 @@ func (e *Encoder) SetClickHandler(handler func()) {
 	e.clickHandler = handler
 	machine.D0.SetInterrupt(machine.PinRising, nil)
 	err := machine.D0.SetInterrupt(machine.PinRising, func(machine.Pin) {
-		e.clickHandler()
+		if time.Since(e.lastClick) > 100*time.Millisecond {
+			e.clickHandler()
+		}
+		e.lastClick = time.Now()
 	})
 	if err != nil {
 		println(err.Error())
