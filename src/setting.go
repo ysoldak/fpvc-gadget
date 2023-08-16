@@ -60,12 +60,12 @@ func (s *Setting) Open() {
 }
 
 func (s *Setting) Show() {
-	display.Rect(30, int16(s.positionOffset+10*(s.position-1)+2), 100, 10, BLACK)
+	display.Rect(30, int16(s.positionOffset+10*(s.position-1)+3), 100, 10, BLACK)
 	switch s.show {
 	case SettingShowDec:
-		display.Print(10, int16(s.positionOffset+10*s.position), fmt.Sprintf("  %s: %d", s.title, s.value)) // TODO support global scroll
+		display.Print(10, int16(s.positionOffset+10*s.position), fmt.Sprintf("  %s: %d", s.title, s.value[0])) // TODO support global scroll
 	case SettingShowHex:
-		display.Print(10, int16(s.positionOffset+10*s.position), fmt.Sprintf("  %s: %X", s.title, s.value)) // TODO support global scroll
+		display.Print(10, int16(s.positionOffset+10*s.position), fmt.Sprintf("  %s: %X", s.title, s.value[0])) // TODO support global scroll
 	case SettingShowChar:
 		display.Print(10, int16(s.positionOffset+10*s.position), fmt.Sprintf("  %s: %s", s.title, string(s.value))) // TODO support global scroll
 	}
