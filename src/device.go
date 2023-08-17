@@ -75,9 +75,11 @@ func (d *Device) Open() {
 				if d.changed {
 					display.Clear(10, 10, fmt.Sprintf("%X !!!", d.id))
 					display.Print(10, 10, fmt.Sprintf("%X", d.id))
+					display.device.Display()
 					err := d.Set()
 					if err != nil {
 						display.Print(10, 10, fmt.Sprintf("%X !!!", d.id))
+						display.device.Display()
 						d.active = true
 						continue
 					}
