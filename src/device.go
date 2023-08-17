@@ -25,6 +25,7 @@ type Device struct {
 	eeprom     []byte
 	eepromPrev []byte
 
+	scroll  int
 	cursor  int
 	active  bool
 	changed bool
@@ -71,7 +72,7 @@ func (d *Device) Open() {
 
 	for {
 		if !d.active {
-			if d.cursor == 4 {
+			if d.cursor == len(d.settings)+1 { // save & back
 				if d.changed {
 					display.Clear(10, 10, fmt.Sprintf("%X !!!", d.id))
 					display.Print(10, 10, fmt.Sprintf("%X", d.id))
@@ -86,13 +87,16 @@ func (d *Device) Open() {
 				}
 				return
 			}
+			if d.cursor == len(d.settings)+2 { // cancel & back
+				return
+			}
 
-			display.Clear(10, 20+int16(d.cursor)*10, ">")
-			display.Print(10, 20+int16(d.cursor)*10, "*")
+			display.Clear(10, 20+int16(d.cursor-d.scroll)*10, ">")
+			display.Print(10, 20+int16(d.cursor-d.scroll)*10, "*")
 			display.device.Display()
 
 			setting := d.settings[d.cursor]
-			setting.Open()
+			setting.Open(d.cursor - d.scroll)
 			if d.cursor == 0 { // special handling for ID setting
 				d.eeprom[setting.address] = setting.value[0] >> 4
 				d.eeprom[setting.address+1] = setting.value[0] & 0x0F
@@ -102,8 +106,8 @@ func (d *Device) Open() {
 				}
 			}
 
-			display.Clear(10, 20+int16(d.cursor)*10, "*")
-			display.Print(10, 20+int16(d.cursor)*10, ">")
+			display.Clear(10, 20+int16(d.cursor-d.scroll)*10, "*")
+			display.Print(10, 20+int16(d.cursor-d.scroll)*10, ">")
 			display.device.Display()
 
 			encoder.SetClickHandler(d.HandleClick)
@@ -121,13 +125,18 @@ func (d *Device) Show() {
 
 	display.Print(10, 10, fmt.Sprintf("%X", d.id))
 
-	for _, s := range d.settings {
-		s.Show()
+	for i, s := range d.settings {
+		if i < d.scroll || i > d.scroll+4 {
+			continue
+		}
+		s.Show(i - d.scroll)
 	}
 
-	display.Print(10, 60, "  Save & Back")
+	display.Print(10, int16(20+(len(d.settings)-d.scroll)*10), "  ----------------")
+	display.Print(10, int16(20+(len(d.settings)+1-d.scroll)*10), "  Save & Back")
+	display.Print(10, int16(20+(len(d.settings)+2-d.scroll)*10), "  Cancel & Back")
 
-	display.Print(10, 20+int16(d.cursor)*10, ">")
+	display.Print(10, 20+int16(d.cursor-d.scroll)*10, ">")
 
 	display.device.Display()
 }
@@ -141,16 +150,36 @@ func (d *Device) HandleChange(value int) int {
 
 	d.cursor = value
 	if d.cursor < 0 {
-		d.cursor = 4
-	}
-	if d.cursor > 4 {
 		d.cursor = 0
 	}
+	if d.cursor == len(d.settings) { // divider
+		if orig < d.cursor {
+			d.cursor++
+		} else {
+			d.cursor--
+		}
+	}
+	if d.cursor > len(d.settings)+2 {
+		d.cursor = len(d.settings) + 2
+	}
+	scrollChanged := false
+	if d.cursor-d.scroll < 0 {
+		d.scroll--
+		scrollChanged = true
+	}
+	if d.cursor-d.scroll > 4 {
+		d.scroll += d.cursor - d.scroll - 4
+		scrollChanged = true
+	}
 
-	if orig != d.cursor {
-		display.Clear(10, 20+int16(orig)*10, ">")
-		display.Print(10, 20+int16(d.cursor)*10, ">")
-		display.device.Display()
+	if scrollChanged {
+		d.Show()
+	} else {
+		if orig != d.cursor {
+			display.Clear(10, 20+int16(orig-d.scroll)*10, ">")
+			display.Print(10, 20+int16(d.cursor-d.scroll)*10, ">")
+			display.device.Display()
+		}
 	}
 	return d.cursor
 }
@@ -220,7 +249,6 @@ func (d *Device) Get(send bool) error {
 		kind:           SettingKindByte,
 		show:           SettingShowHex,
 		title:          "ID",
-		position:       0,
 		positionOffset: 20,
 	})
 
@@ -233,7 +261,6 @@ func (d *Device) Get(send bool) error {
 		kind:           SettingKindByte,
 		show:           SettingShowChar,
 		title:          "Name",
-		position:       1,
 		positionOffset: 20,
 	})
 	copy(d.settings[1].value, d.eeprom[100:110])
@@ -247,7 +274,6 @@ func (d *Device) Get(send bool) error {
 		kind:           SettingKindByte,
 		show:           SettingShowDec,
 		title:          "Life",
-		position:       2,
 		positionOffset: 20,
 	})
 
@@ -260,34 +286,44 @@ func (d *Device) Get(send bool) error {
 		kind:           SettingKindByte,
 		show:           SettingShowDec,
 		title:          "Ammo",
-		position:       3,
 		positionOffset: 20,
 	})
 
-	// d.settings = append(d.settings, Setting{
-	// 	address:        64,
-	// 	value:          []byte{d.eeprom[64]},
-	// 	min:            0xA,
-	// 	max:            0xF,
-	// 	len:            1,
-	// 	kind:           SettingKindByte,
-	// 	show:           SettingShowHex,
-	// 	title:          "Team",
-	// 	position:       3,
-	// 	positionOffset: 20,
-	// })
-	// d.settings = append(d.settings, Setting{
-	// 	address:        65,
-	// 	value:          []byte{d.eeprom[65]},
-	// 	min:            0x1,
-	// 	max:            0xF,
-	// 	len:            1,
-	// 	kind:           SettingKindByte,
-	// 	show:           SettingShowHex,
-	// 	title:          "Player",
-	// 	position:       4,
-	// 	positionOffset: 20,
-	// })
+	d.settings = append(d.settings, Setting{
+		address:        69,
+		value:          []byte{d.eeprom[69]},
+		min:            1,
+		max:            8,
+		len:            1,
+		kind:           SettingKindByte,
+		show:           SettingShowDec,
+		title:          "Power",
+		positionOffset: 20,
+	})
+
+	d.settings = append(d.settings, Setting{
+		address:        70,
+		value:          []byte{d.eeprom[70]},
+		min:            1,
+		max:            8,
+		len:            1,
+		kind:           SettingKindByte,
+		show:           SettingShowDec,
+		title:          "Rate",
+		positionOffset: 20,
+	})
+
+	d.settings = append(d.settings, Setting{
+		address:        71,
+		value:          []byte{d.eeprom[71]},
+		min:            1,
+		max:            8,
+		len:            1,
+		kind:           SettingKindByte,
+		show:           SettingShowDec,
+		title:          "Defense",
+		positionOffset: 20,
+	})
 
 	return nil
 }
