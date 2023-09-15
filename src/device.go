@@ -297,7 +297,7 @@ func (d *Device) Get(send bool) error {
 		len:            1,
 		kind:           SettingKindByte,
 		show:           SettingShowDec,
-		title:          "Power",
+		title:          "Shoot Power",
 		positionOffset: 20,
 	})
 
@@ -309,7 +309,7 @@ func (d *Device) Get(send bool) error {
 		len:            1,
 		kind:           SettingKindByte,
 		show:           SettingShowDec,
-		title:          "Rate",
+		title:          "Shoot Rate",
 		positionOffset: 20,
 	})
 
@@ -322,6 +322,78 @@ func (d *Device) Get(send bool) error {
 		kind:           SettingKindByte,
 		show:           SettingShowDec,
 		title:          "Defense",
+		positionOffset: 20,
+	})
+
+	d.settings = append(d.settings, Setting{
+		address:        73,
+		value:          []byte{d.eeprom[73]},
+		min:            0,
+		max:            255,
+		len:            1,
+		kind:           SettingKindByte,
+		show:           SettingShowDec,
+		title:          "Shake Speed",
+		positionOffset: 20,
+	})
+
+	d.settings = append(d.settings, Setting{
+		address:        74,
+		value:          []byte{d.eeprom[74]},
+		min:            0,
+		max:            255,
+		len:            1,
+		kind:           SettingKindByte,
+		show:           SettingShowDec,
+		title:          "Shake Level",
+		positionOffset: 20,
+	})
+
+	d.settings = append(d.settings, Setting{
+		address:        80,
+		value:          []byte{d.eeprom[80]},
+		min:            0,
+		max:            255,
+		len:            1,
+		kind:           SettingKindByte,
+		show:           SettingShowDec,
+		title:          "Effect Time",
+		positionOffset: 20,
+	})
+
+	d.settings = append(d.settings, Setting{
+		address:        90,
+		value:          []byte{d.eeprom[90]},
+		min:            0,
+		max:            2,
+		len:            1,
+		kind:           SettingKindByte,
+		show:           SettingShowDec,
+		title:          "Output Mode",
+		positionOffset: 20,
+	})
+
+	d.settings = append(d.settings, Setting{
+		address:        91,
+		value:          []byte{d.eeprom[91]},
+		min:            0,
+		max:            255,
+		len:            1,
+		kind:           SettingKindByte,
+		show:           SettingShowDec,
+		title:          "Addr Led",
+		positionOffset: 20,
+	})
+
+	d.settings = append(d.settings, Setting{
+		address:        92,
+		value:          []byte{d.eeprom[92]},
+		min:            0,
+		max:            255,
+		len:            1,
+		kind:           SettingKindByte,
+		show:           SettingShowDec,
+		title:          "Info Led",
 		positionOffset: 20,
 	})
 
