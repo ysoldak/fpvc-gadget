@@ -1,10 +1,13 @@
+TARGET ?= xiao-rp2040 # xiao-ble
+
 .PHONY: build flash monitor
 
 build:
-	tinygo build -target=xiao-rp2040 -size=short -o build/firmware.uf2 ./src
+	@mkdir -p build
+	tinygo build -target=$(TARGET) -size=short -o build/firmware.uf2 ./src
 
 flash:
-	tinygo flash -target=xiao-rp2040 -size=short ./src
+	tinygo flash -target=$(TARGET) -size=short ./src
 
 monitor:
-	tinygo flash -target=xiao-rp2040 -size=short -monitor ./src 
+	tinygo flash -target=$(TARGET) -size=short -monitor ./src 
