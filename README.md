@@ -18,7 +18,7 @@ Note: FPV Combat board shall be flashed with [firmware v2.5.0 or later](https://
 
 | Picture  | Item    | Comment | Price (per item)  |
 | -------- | ------- | ------- | ------- |
-| <img src="media/MCU_XIAO-nRF52840.jpg" width="100"/> | XIAO-nRF52840 board | With battery charger | [$9.90](https://www.seeedstudio.com/Seeed-XIAO-BLE-nRF52840-p-5201.html) |
+| <img src="media/MCU_XIAO-nrf52840.jpg" width="100"/> | XIAO-nRF52840 board | With battery charger | [$9.90](https://www.seeedstudio.com/Seeed-XIAO-BLE-nRF52840-p-5201.html) |
 | <img src="media/Network_HC-12.jpg" width="100"/> | HC-12 network module | 433Mhz | [$11.60](https://www.amazon.se/ICQUANZX-trådlös-portmodul-ersätter-Bluetooth/dp/B07C92ZRS8/) |
 | <img src="media/Display_SH1106.jpg" width="100"/> | 0.96inch display | OLED 128 x 64 | [$2.4](https://www.alibaba.com/product-detail/Most-Popular-GME12864-White-4pins-I2C_1600270997819.html) - [$3.8](https://www.amazon.se/dp/B074NJMPYJ) |
 | <img src="media/RotaryEncoder_KC-040.jpg" width="100"/> | KY-040 rotary encoder | Breakout | [$1.8](https://www.amazon.se/dp/B07TKK4QQD) |
@@ -26,7 +26,7 @@ Note: FPV Combat board shall be flashed with [firmware v2.5.0 or later](https://
 | <img src="media/PrototypeBoard.jpg" width="100"/> | Prototype board | 3 x 7 cm | [$0.8](https://www.amazon.se/dp/B07CQQK214) |
 | <img src="media/Battery.jpg" width="100"/> | LiPo Battery 500mAh | max 4.5 x 2.5 x 0.9 cm | [$11](https://www.amazon.se/dp/B01FBSA1N6/) |
 | <img src="media/MicroSwitch.jpg" width="100"/> | Micro Slide Switch | 2 positions, 3 contacts | [$0.1](https://www.amazon.se/Gebildet-Vertikal-Switch-SS-12d00-Position/dp/B08L6FMV84/?th=1) | 
-| **Total (approximately)** ||| **$45** |
+| **Total** ||| **$45** |
 
 ### Alternatives
 - MCU
