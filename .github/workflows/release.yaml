@@ -33,7 +33,7 @@ jobs:
     - name: Build XIAO BLE binary
       run: make TARGET=xiao-ble build
 
-    - name: Upload XIAO BLE Sense binaries to release
+    - name: Upload XIAO BLE binaries to release
       uses: svenstaro/upload-release-action@v2
       with:
         tag: ${{ github.ref }}
