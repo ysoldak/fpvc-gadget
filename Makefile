@@ -1,13 +1,20 @@
-TARGET ?= xiao-rp2040 # xiao-ble
+TARGET ?= xiao-ble
+FILE = fpvc-gadget_$(TARGET)_$(VERSION).uf2
 
-.PHONY: build flash monitor
+VERSION := $(shell git describe --tags --always)
+LD_FLAGS := -ldflags="-X 'main.Version=$(VERSION)'" # https://www.digitalocean.com/community/tutorials/using-ldflags-to-set-version-information-for-go-applications
+
+.PHONY: clean build flash monitor
+
+clean:
+	@rm -rf build
 
 build:
 	@mkdir -p build
-	tinygo build -target=$(TARGET) -size=short -o build/firmware.uf2 ./src
+	tinygo build $(LD_FLAGS) -target=$(TARGET) -size=short -o build/$(FILE) ./src
 
 flash:
-	tinygo flash -target=$(TARGET) -size=short ./src
+	tinygo flash $(LD_FLAGS) -target=$(TARGET) -size=short ./src
 
 monitor:
-	tinygo flash -target=$(TARGET) -size=short -monitor ./src 
+	tinygo flash $(LD_FLAGS) -target=$(TARGET) -size=short -monitor ./src 

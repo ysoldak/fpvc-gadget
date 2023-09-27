@@ -1,0 +1,45 @@
+name: Build binary
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/tinygo-org/tinygo:0.28.1
+      options: --user root
+    steps:
+
+    - name: Prepare
+      run: |
+        apt-get update
+        apt-get install -y make
+
+    - name: Work around CVE-2022-24765
+      # We're not on a multi-user machine, so this is safe.
+      run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Dependencies
+      run: |
+        go mod tidy
+
+    - name: Build XIAO BLE binary
+      run: make TARGET=xiao-ble build
+
+    - name: Store binaries
+      uses: actions/upload-artifact@v3
+      with:
+        name: binaries
+        path: build/*
+        retention-days: 14

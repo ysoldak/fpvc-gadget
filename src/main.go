@@ -4,6 +4,8 @@ import (
 	"machine"
 )
 
+var Version string
+
 var display *Display
 var serial *Serial
 var encoder *Encoder
