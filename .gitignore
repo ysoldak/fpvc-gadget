@@ -20,5 +20,10 @@
 # Go workspace file
 go.work
 
+# MacOS junk
+.DS_Store
+
 build
 .vscode/settings.json
+pcb/Gadget-backups
+pcb/fp-info-cache
