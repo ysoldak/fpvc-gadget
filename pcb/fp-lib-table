@@ -1,0 +1,4 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "Gadget")(type "KiCad")(uri "${KIPRJMOD}/Gadget.pretty")(options "")(descr ""))
+)

@@ -43,13 +43,17 @@ Note: FPV Combat board shall be flashed with [firmware v2.5.0 or later](https://
 
 The gadget exists in only one exemplair so far, a prototype (pictured).  
 In the future, more and detailed documentation will be added eventually.  
-We plan to have PCB design for easier assembly too.
 
 <img src="media/GadgetExploded.jpg" width="512"/>
 
 <img src="media/GadgetTop.jpg" width="256"/> <img src="media/GadgetBottom.jpg" width="256"/>
 
 <img src="media/WiringSchema.png" width="512"/>
+
+<img src="media/PCB_Front.png" width="512"/>
+
+<img src="media/PCB_Back.png" width="512"/>
+
 
 ## Contacts
 
