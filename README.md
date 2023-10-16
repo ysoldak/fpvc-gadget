@@ -20,7 +20,7 @@ Note: FPV Combat board shall be flashed with [firmware v2.5.0 or later](https://
 | -------- | ------- | ------- | ------- |
 | <img src="media/MCU_XIAO-nrf52840.jpg" width="100"/> | [XIAO-nRF52840 board](https://www.seeedstudio.com/Seeed-XIAO-BLE-nRF52840-p-5201.html) | With battery charger | [$9.90](https://www.seeedstudio.com/Seeed-XIAO-BLE-nRF52840-p-5201.html) |
 | <img src="media/Network_HC-12.jpg" width="100"/> | [HC-12 network module](https://www.hc01.com/goods/640e91920be12d0114404c95) | 433Mhz | $12 |
-| <img src="media/Display_SH1106.jpg" width="100"/> | 0.96inch display | OLED 128 x 64 | [$2.4](https://www.alibaba.com/product-detail/Most-Popular-GME12864-White-4pins-I2C_1600270997819.html) - [$3.8](https://www.amazon.se/dp/B074NJMPYJ) |
+| <img src="media/Display_SH1106.jpg" width="100"/> | [0.96inch display](https://www.az-delivery.de/en/products/0-96zolldisplay) | OLED 128 x 64 | [$2.4](https://www.alibaba.com/product-detail/Most-Popular-GME12864-White-4pins-I2C_1600270997819.html) - [$3.8](https://www.amazon.se/dp/B074NJMPYJ) |
 | <img src="media/RotaryEncoder_KC-040.jpg" width="100"/> | KY-040 rotary encoder | Breakout | [$1.8](https://www.amazon.se/dp/B07TKK4QQD) |
 | <img src="media/StepDown_AF4711.jpg" width="100"/> | [Adafruit TLV62569 (4711)](https://www.adafruit.com/product/4711) | Step-down converter 3.4~5.5V to 3.3V | [$3.95](https://www.digikey.se/sv/products/detail/adafruit-industries-llc/4711/13162412) |
 | <img src="media/PrototypeBoard.jpg" width="100"/> | Prototype board | 3 x 7 cm, or PCB | [$0.8](https://www.amazon.se/dp/B07CQQK214) |
