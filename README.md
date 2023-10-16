@@ -23,8 +23,8 @@ Note: FPV Combat board shall be flashed with [firmware v2.5.0 or later](https://
 | <img src="media/Display_SH1106.jpg" width="100"/> | [0.96inch display](https://www.az-delivery.de/en/products/0-96zolldisplay) | OLED 128 x 64 | [$2.4](https://www.alibaba.com/product-detail/Most-Popular-GME12864-White-4pins-I2C_1600270997819.html) - [$3.8](https://www.amazon.se/dp/B074NJMPYJ) |
 | <img src="media/RotaryEncoder_KC-040.jpg" width="100"/> | KY-040 rotary encoder | Breakout | [$1.8](https://www.amazon.se/dp/B07TKK4QQD) |
 | <img src="media/StepDown_AF4711.jpg" width="100"/> | [Adafruit TLV62569 (4711)](https://www.adafruit.com/product/4711) | Step-down converter 3.4~5.5V to 3.3V | [$3.95](https://www.digikey.se/sv/products/detail/adafruit-industries-llc/4711/13162412) |
-| <img src="media/PrototypeBoard.jpg" width="100"/> | Prototype board | 3 x 7 cm, or PCB | [$0.8](https://www.amazon.se/dp/B07CQQK214) |
-| <img src="media/Battery.jpg" width="100"/> | LiPo Battery 500mAh | max 4.5 x 2.5 x 0.9 cm | [$11](https://www.amazon.se/dp/B01FBSA1N6/) |
+| <img src="media/PrototypeBoard.jpg" width="100"/> | Prototype board | 30 x 70 mm, or PCB | [$0.8](https://www.amazon.se/dp/B07CQQK214) |
+| <img src="media/Battery.jpg" width="100"/> | LiPo Battery | 1S, 100-500mAh, 45 x 25 x 9 mm | [$11](https://www.amazon.se/dp/B01FBSA1N6/) |
 | <img src="media/MicroSwitch.jpg" width="100"/> | Micro Slide Switch | 2 positions, 3 contacts | [$0.1](https://www.amazon.se/Gebildet-Vertikal-Switch-SS-12d00-Position/dp/B08L6FMV84/?th=1) | 
 | **Total** ||| **$45** |
 
@@ -43,15 +43,29 @@ Note: FPV Combat board shall be flashed with [firmware v2.5.0 or later](https://
 
 It is possible to [order the gadget](https://www.etsy.com/se-en/listing/1589030767/fpv-combat-gadget-battery-not-included) either fully assembled, as a kit or just PCB from [our shop on Etsy](https://www.etsy.com/se-en/shop/SkyGadgets).
 
-Alternatively, you can always order PCB yourself from PCBWay, JLCPCB and alike or use 3x7cm prototype board.
+Alternatively, you can always order PCB yourself from PCBWay, JLCPCB and alike or use 30x70mm prototype board.
 
-Pictured is the gadget prototype.  
+### Assembly tips
+
+- Once soldered, backs of pins/slots have to be filed out/flattened, otherwise risk of damaging the battery;
+- Straighten encoder pins and cut them a bit, just a several mm;
+- Cut a bit of encoder pcb, across mounting holes, otherwise it does not fit;
+- HC-12 is placed white (flat) side up;
+- Pull HC-12 antenna a little so it is away from everything to minimise interference.
+
+<img src="media/AssemblyFlatten.jpg" width="512"/>
+
+<img src="media/AssemblyTips.jpg" width="512"/>
 
 <img src="media/GadgetExploded.jpg" width="512"/>
 
-<img src="media/GadgetTop.jpg" width="256"/> <img src="media/GadgetBottom.jpg" width="256"/>
+<img src="media/GadgetTop.jpg" width="512"/>
+
+### Schematic
 
 <img src="media/WiringSchema.png" width="512"/>
+
+### PCB
 
 <img src="media/PCB_Front.png" width="512"/>
 
