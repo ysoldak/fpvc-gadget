@@ -29,6 +29,7 @@ type Device struct {
 	cursor  int
 	active  bool
 	changed bool
+	failure bool
 }
 
 func NewDevice() *Device {
@@ -59,7 +60,7 @@ func (d *Device) Open() {
 
 	err := d.Get(true)
 	if err != nil {
-		println(err.Error())
+		d.failure = true
 		display.Clear(10, 30, "Refreshing...")
 		display.Print(10, 30, err.Error())
 		display.device.Display()
@@ -87,7 +88,7 @@ func (d *Device) Open() {
 				}
 				return
 			}
-			if d.cursor == len(d.settings)+2 { // cancel & back
+			if d.failure || d.cursor == len(d.settings)+2 { // failure to fetch config OR cancel & back
 				return
 			}
 
