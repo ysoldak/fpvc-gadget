@@ -40,6 +40,14 @@ func (d *Display) Clear(x, y int16, message string) {
 	tinyfont.WriteLineRotated(&d.device, &proggy.TinySZ8pt7b, x, y, message, BLACK, tinyfont.NO_ROTATION)
 }
 
-func (d *Display) Rect(x, y, w, h int16, color color.RGBA) {
+func (d *Display) Fill(x, y, w, h int16, color color.RGBA) {
 	tinydraw.FilledRectangle(&d.device, x, y, w, h, color)
+}
+
+func (d *Display) Rect(x, y, w, h int16, color color.RGBA) {
+	tinydraw.Rectangle(&d.device, x, y, w, h, color)
+}
+
+func (d *Display) Line(x0, y0, x1, y1 int16, color color.RGBA) {
+	tinydraw.Line(&d.device, x0, y0, x1, y1, color)
 }

@@ -81,17 +81,21 @@ func (s *Scan) Open() {
 func (s *Scan) Show() {
 	if s.redraw {
 		display.device.ClearDisplay()
+
+		display.Print(1, 6, "Scanning...")
+		display.Line(1, 11, 126, 11, WHITE)
+
 		for i, dev := range s.devices {
 			// fmt.Printf("%X | '%s'\r\n", dev.id, string(dev.name))
-			display.Print(10, 10+int16(i)*10, fmt.Sprintf("  %X | %s ", dev.id, dev.name))
+			display.Print(1, 20+int16(i)*10, fmt.Sprintf("  %X | %s ", dev.id, dev.name))
 		}
-		display.Print(10, 10+int16(s.cursor)*10, ">")
+		display.Print(1, 20+int16(s.cursor)*10, ">")
 		s.redraw = false
 		display.device.Display()
 	}
 	if s.cursorPrev != s.cursor {
-		display.Clear(10, 10+int16(s.cursorPrev)*10, ">")
-		display.Print(10, 10+int16(s.cursor)*10, ">")
+		display.Clear(1, 20+int16(s.cursorPrev)*10, ">")
+		display.Print(1, 20+int16(s.cursor)*10, ">")
 		s.cursorPrev = s.cursor
 		display.device.Display()
 	}
@@ -103,19 +107,28 @@ func (s *Scan) Receive() {
 	}
 	key := byte(0)
 	name := make([]byte, 10)
+	desc := make([]byte, 10)
 	for i := 0; i < 22; i++ {
 		b, err := serial.uart.ReadByte()
 		if err != nil {
 			return
 		}
-		if i == 0 && 0xA0 < b && b < 0xFF {
+		switch {
+		case i == 0:
+			if !(0xA0 < b && b < 0xFF) {
+				return
+			}
 			key = b
-		}
-		if 1 < i && i < 12 {
+		case 1 < i && i < 12:
 			if b == 0x2F {
 				b = 0x20
 			}
 			name[i-2] = b
+		case 11 < i && i < 22:
+			if b == 0x2F {
+				b = 0x20
+			}
+			desc[i-12] = b
 		}
 	}
 	found := false
@@ -129,6 +142,7 @@ func (s *Scan) Receive() {
 		device := NewDevice()
 		device.id = key
 		device.name = string(name)
+		device.description = string(desc)
 		s.devices = append(s.devices, device)
 		s.redraw = true
 	}
