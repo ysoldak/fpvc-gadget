@@ -44,7 +44,7 @@ func (d *Device) Open() {
 
 	encoder.SetChangeHandler(nil)
 
-	d.cursor = 4
+	d.cursor = 0
 	encoder.SetClickHandler(d.HandleClick)
 
 	display.device.ClearDisplay()
