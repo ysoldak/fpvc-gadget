@@ -382,7 +382,7 @@ func (d *Device) Get(send bool) error {
 		len:            1,
 		kind:           SettingKindByte,
 		show:           SettingShowDec,
-		title:          "Addr Led",
+		title:          "Team Led",
 		positionOffset: 20,
 	})
 
