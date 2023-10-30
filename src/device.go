@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -17,8 +18,9 @@ var (
 var buf []byte = make([]byte, 1000)
 
 type Device struct {
-	id   byte
-	name string
+	id          byte
+	name        string
+	description string
 
 	settings []Setting
 
@@ -50,7 +52,7 @@ func (d *Device) Open() {
 
 	display.device.ClearDisplay()
 
-	display.Print(10, 10, fmt.Sprintf("%X", d.id))
+	d.ShowHeader()
 
 	display.Print(10, 30, "Refreshing...")
 
@@ -73,14 +75,14 @@ func (d *Device) Open() {
 
 	for {
 		if !d.active {
-			if d.cursor == len(d.settings)+1 { // save & back
+			if d.cursor == len(d.settings) { // save & back
 				if d.changed {
-					display.Clear(10, 10, fmt.Sprintf("%X !!!", d.id))
-					display.Print(10, 10, fmt.Sprintf("%X", d.id))
+					display.Clear(1, 10, fmt.Sprintf("%X !!!", d.id))
+					display.Print(1, 10, fmt.Sprintf("%X", d.id))
 					display.device.Display()
 					err := d.Set()
 					if err != nil {
-						display.Print(10, 10, fmt.Sprintf("%X !!!", d.id))
+						display.Print(1, 10, fmt.Sprintf("%X !!!", d.id))
 						display.device.Display()
 						d.active = true
 						continue
@@ -88,12 +90,12 @@ func (d *Device) Open() {
 				}
 				return
 			}
-			if d.failure || d.cursor == len(d.settings)+2 { // failure to fetch config OR cancel & back
+			if d.failure || d.cursor == len(d.settings)+1 { // failure to fetch config OR cancel & back
 				return
 			}
 
-			display.Clear(10, 20+int16(d.cursor-d.scroll)*10, ">")
-			display.Print(10, 20+int16(d.cursor-d.scroll)*10, "*")
+			display.Clear(1, 20+int16(d.cursor-d.scroll)*10, ">")
+			display.Print(1, 20+int16(d.cursor-d.scroll)*10, "*")
 			display.device.Display()
 
 			setting := d.settings[d.cursor]
@@ -107,8 +109,8 @@ func (d *Device) Open() {
 				}
 			}
 
-			display.Clear(10, 20+int16(d.cursor-d.scroll)*10, "*")
-			display.Print(10, 20+int16(d.cursor-d.scroll)*10, ">")
+			display.Clear(1, 20+int16(d.cursor-d.scroll)*10, "*")
+			display.Print(1, 20+int16(d.cursor-d.scroll)*10, ">")
 			display.device.Display()
 
 			encoder.SetClickHandler(d.HandleClick)
@@ -124,7 +126,7 @@ func (d *Device) Open() {
 func (d *Device) Show() {
 	display.device.ClearDisplay()
 
-	display.Print(10, 10, fmt.Sprintf("%X", d.id))
+	d.ShowHeader()
 
 	for i, s := range d.settings {
 		if i < d.scroll || i > d.scroll+4 {
@@ -133,13 +135,18 @@ func (d *Device) Show() {
 		s.Show(i - d.scroll)
 	}
 
-	display.Print(10, int16(20+(len(d.settings)-d.scroll)*10), "  ----------------")
-	display.Print(10, int16(20+(len(d.settings)+1-d.scroll)*10), "  Save & Back")
-	display.Print(10, int16(20+(len(d.settings)+2-d.scroll)*10), "  Cancel & Back")
+	display.Line(12, int16(20+(len(d.settings)-1-d.scroll)*10)+2, 126, int16(20+(len(d.settings)-1-d.scroll)*10)+2, WHITE)
+	display.Print(1, int16(20+(len(d.settings)-d.scroll)*10), "  Save & Back")
+	display.Print(1, int16(20+(len(d.settings)+1-d.scroll)*10), "  Cancel & Back")
 
-	display.Print(10, 20+int16(d.cursor-d.scroll)*10, ">")
+	display.Print(1, 20+int16(d.cursor-d.scroll)*10, ">")
 
 	display.device.Display()
+}
+
+func (d *Device) ShowHeader() {
+	display.Print(1, 6, fmt.Sprintf("%-10s  %10s", d.name, strings.TrimSpace(d.description)))
+	display.Line(1, 11, 126, 11, WHITE)
 }
 
 func (d *Device) HandleClick() {
@@ -150,22 +157,15 @@ func (d *Device) HandleChange(value int) int {
 	orig := d.cursor
 
 	d.cursor = value
-	if d.cursor < 0 {
+	if d.cursor < 0 { // wrap up
+		d.cursor = len(d.settings) + 1
+	}
+	if d.cursor > len(d.settings)+1 { // wrap down
 		d.cursor = 0
-	}
-	if d.cursor == len(d.settings) { // divider
-		if orig < d.cursor {
-			d.cursor++
-		} else {
-			d.cursor--
-		}
-	}
-	if d.cursor > len(d.settings)+2 {
-		d.cursor = len(d.settings) + 2
 	}
 	scrollChanged := false
 	if d.cursor-d.scroll < 0 {
-		d.scroll--
+		d.scroll -= d.scroll - d.cursor
 		scrollChanged = true
 	}
 	if d.cursor-d.scroll > 4 {
@@ -177,8 +177,8 @@ func (d *Device) HandleChange(value int) int {
 		d.Show()
 	} else {
 		if orig != d.cursor {
-			display.Clear(10, 20+int16(orig-d.scroll)*10, ">")
-			display.Print(10, 20+int16(d.cursor-d.scroll)*10, ">")
+			display.Clear(1, 20+int16(orig-d.scroll)*10, ">")
+			display.Print(1, 20+int16(d.cursor-d.scroll)*10, ">")
 			display.device.Display()
 		}
 	}
