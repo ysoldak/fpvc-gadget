@@ -1,9 +1,9 @@
 module fpvc-gadget
 
-go 1.20
+go 1.21
 
 require (
-	tinygo.org/x/drivers v0.25.0
+	tinygo.org/x/drivers v0.26.0
 	tinygo.org/x/tinydraw v0.4.0
 	tinygo.org/x/tinyfont v0.4.0
 )
