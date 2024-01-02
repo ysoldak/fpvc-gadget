@@ -24,7 +24,7 @@ func (s *Scan) Open() {
 	s.active = true
 	s.redraw = true
 	s.cursor = 0
-	s.cursorPrev = -1
+	s.cursorPrev = 0
 
 	s.Show()
 
@@ -66,7 +66,7 @@ func (s *Scan) Open() {
 			s.active = true
 			s.redraw = true
 			s.cursor = 0
-			s.cursorPrev = -1
+			s.cursorPrev = 0
 			s.devices = []*Device{}
 
 			s.Show()
@@ -153,6 +153,9 @@ func (s *Scan) HandleClick() {
 }
 
 func (s *Scan) HandleChange(value int) int {
+	if len(s.devices) == 0 {
+		return 0
+	}
 	s.cursorPrev = s.cursor
 	s.cursor = value
 	if value < 0 {
