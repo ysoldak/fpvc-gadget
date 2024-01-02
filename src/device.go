@@ -187,6 +187,9 @@ func (d *Device) HandleChange(value int) int {
 
 func (d *Device) Get(send bool) error {
 	if send {
+		for serial.uart.Buffered() > 0 {
+			serial.uart.Read(buf)
+		}
 		serial.uart.WriteByte(0x72)
 		serial.uart.WriteByte(d.id)
 	}
