@@ -24,6 +24,8 @@ go.work
 .DS_Store
 
 build
+releases
+print
 .vscode/settings.json
 pcb/Gadget-backups
 pcb/fp-info-cache
