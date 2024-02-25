@@ -48,9 +48,6 @@ func (s *Scan) Open() {
 
 		s.Show()
 
-		if i%100 == 0 {
-			println(i)
-		}
 		time.Sleep(10 * time.Millisecond)
 
 		i++

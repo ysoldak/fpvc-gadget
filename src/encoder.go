@@ -31,15 +31,12 @@ func (e *Encoder) Configure() {
 func (e *Encoder) SetClickHandler(handler func()) {
 	e.clickHandler = handler
 	machine.D0.SetInterrupt(machine.PinRising, nil)
-	err := machine.D0.SetInterrupt(machine.PinRising, func(machine.Pin) {
+	machine.D0.SetInterrupt(machine.PinRising, func(machine.Pin) {
 		if time.Since(e.lastClick) > 100*time.Millisecond {
 			e.clickHandler()
 		}
 		e.lastClick = time.Now()
 	})
-	if err != nil {
-		println(err.Error())
-	}
 }
 
 func (e *Encoder) SetChangeHandler(handler func(value int) int) {
