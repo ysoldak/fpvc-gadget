@@ -16,6 +16,7 @@ const (
 	SettingShowDec byte = iota
 	SettingShowHex
 	SettingShowChar
+	SettingShowTitles
 )
 
 type Setting struct {
@@ -35,6 +36,10 @@ type Setting struct {
 	title  string
 	update bool
 	active bool
+
+	valueOffset     uint16
+	valueMultiplier byte
+	valueTitles     []string
 
 	positionOffset int
 }
@@ -62,11 +67,20 @@ func (s *Setting) Show(position int) {
 	display.Fill(20, int16(s.positionOffset+10*(position-1)+3), 128, 10, BLACK)
 	switch s.show {
 	case SettingShowDec:
-		display.Print(1, int16(s.positionOffset+10*position), fmt.Sprintf("  %s: %d", s.title, s.value[0])) // TODO support global scroll
+		val := uint16(s.value[0])
+		if s.valueMultiplier != 0 {
+			val *= uint16(s.valueMultiplier)
+		}
+		if s.valueOffset != 0 {
+			val += s.valueOffset
+		}
+		display.Print(1, int16(s.positionOffset+10*position), fmt.Sprintf("  %s: %d", s.title, val))
 	case SettingShowHex:
-		display.Print(1, int16(s.positionOffset+10*position), fmt.Sprintf("  %s: %X", s.title, s.value[0])) // TODO support global scroll
+		display.Print(1, int16(s.positionOffset+10*position), fmt.Sprintf("  %s: %X", s.title, s.value[0]))
 	case SettingShowChar:
-		display.Print(1, int16(s.positionOffset+10*position), fmt.Sprintf("  %s: %s", s.title, string(s.value))) // TODO support global scroll
+		display.Print(1, int16(s.positionOffset+10*position), fmt.Sprintf("  %s: %s", s.title, string(s.value)))
+	case SettingShowTitles:
+		display.Print(1, int16(s.positionOffset+10*position), fmt.Sprintf("  %s: %s", s.title, s.valueTitles[s.value[0]]))
 	}
 	display.device.Display()
 }

@@ -7,12 +7,14 @@ import (
 	"time"
 )
 
+const EEPROMVersion = 2
+
 var (
-	ErrTimeout     = errors.New("Request Timeout")
-	ErrWrongId     = errors.New("Request Wrong ID")
-	ErrWrongVerson = errors.New("Request Wrong Version")
-	ErrWrongCrc    = errors.New("Request Wrong Crc")
-	ErrSetFailed   = errors.New("Request Set Failed")
+	ErrTimeout       = errors.New("Request Timeout")
+	ErrWrongId       = errors.New("Wrong ID")
+	ErrWrongVerson   = errors.New("Wrong Version")
+	ErrWrongChecksum = errors.New("Wrong Checksum")
+	ErrSetFailed     = errors.New("Set Failed")
 )
 
 var buf []byte = make([]byte, 1000)
@@ -214,19 +216,17 @@ func (d *Device) Get(send bool) error {
 		return ErrWrongId
 	}
 
-	if buf[1] != 1 {
+	if buf[1] != EEPROMVersion {
 		return ErrWrongVerson
 	}
 
-	crc := byte(0)
+	checksum := byte(0)
 	for i := 0; i < 112; i++ {
-		crc += buf[i]
+		checksum += buf[i]
 	}
-	if buf[112] != crc {
-		return ErrWrongCrc
+	if buf[112] != checksum {
+		return ErrWrongChecksum
 	}
-
-	println(len(d.eeprom))
 
 	if len(d.eeprom) == 0 {
 		d.eeprom = make([]byte, 110)
@@ -237,10 +237,10 @@ func (d *Device) Get(send bool) error {
 	d.settings = []Setting{}
 
 	d.settings = append(d.settings, Setting{
-		address: 64,
-		value:   []byte{(d.eeprom[64] << 4) + d.eeprom[65]},
+		address: 72,
+		value:   []byte{(d.eeprom[72] << 4) + d.eeprom[73]},
 		min:     0xA1,
-		max:     0xF9,
+		max:     0xE9,
 		invalid: []byte{
 			0xA0, 0xAA, 0xAB, 0xAC, 0xAD, 0xAE, 0xAF,
 			0xB0, 0xBA, 0xBB, 0xBC, 0xBD, 0xBE, 0xBF,
@@ -270,8 +270,8 @@ func (d *Device) Get(send bool) error {
 	copy(d.settings[1].value, d.eeprom[100:110])
 
 	d.settings = append(d.settings, Setting{
-		address:        62,
-		value:          []byte{d.eeprom[62]},
+		address:        70,
+		value:          []byte{d.eeprom[70]},
 		min:            0,
 		max:            255,
 		len:            1,
@@ -282,8 +282,8 @@ func (d *Device) Get(send bool) error {
 	})
 
 	d.settings = append(d.settings, Setting{
-		address:        63,
-		value:          []byte{d.eeprom[63]},
+		address:        71,
+		value:          []byte{d.eeprom[71]},
 		min:            0,
 		max:            255,
 		len:            1,
@@ -294,8 +294,8 @@ func (d *Device) Get(send bool) error {
 	})
 
 	d.settings = append(d.settings, Setting{
-		address:        69,
-		value:          []byte{d.eeprom[69]},
+		address:        75,
+		value:          []byte{d.eeprom[75]},
 		min:            1,
 		max:            8,
 		len:            1,
@@ -306,8 +306,8 @@ func (d *Device) Get(send bool) error {
 	})
 
 	d.settings = append(d.settings, Setting{
-		address:        70,
-		value:          []byte{d.eeprom[70]},
+		address:        76,
+		value:          []byte{d.eeprom[76]},
 		min:            1,
 		max:            8,
 		len:            1,
@@ -318,8 +318,8 @@ func (d *Device) Get(send bool) error {
 	})
 
 	d.settings = append(d.settings, Setting{
-		address:        71,
-		value:          []byte{d.eeprom[71]},
+		address:        77,
+		value:          []byte{d.eeprom[77]},
 		min:            1,
 		max:            8,
 		len:            1,
@@ -330,51 +330,72 @@ func (d *Device) Get(send bool) error {
 	})
 
 	d.settings = append(d.settings, Setting{
-		address:        73,
-		value:          []byte{d.eeprom[73]},
-		min:            0,
-		max:            255,
-		len:            1,
-		kind:           SettingKindByte,
-		show:           SettingShowDec,
-		title:          "Shake Speed",
-		positionOffset: 20,
-	})
-
-	d.settings = append(d.settings, Setting{
-		address:        74,
-		value:          []byte{d.eeprom[74]},
-		min:            0,
-		max:            255,
-		len:            1,
-		kind:           SettingKindByte,
-		show:           SettingShowDec,
-		title:          "Shake Level",
-		positionOffset: 20,
-	})
-
-	d.settings = append(d.settings, Setting{
-		address:        80,
-		value:          []byte{d.eeprom[80]},
-		min:            0,
-		max:            255,
-		len:            1,
-		kind:           SettingKindByte,
-		show:           SettingShowDec,
-		title:          "Effect Time",
-		positionOffset: 20,
-	})
-
-	d.settings = append(d.settings, Setting{
-		address:        90,
-		value:          []byte{d.eeprom[90]},
+		address:        84,
+		value:          []byte{d.eeprom[84]},
 		min:            0,
 		max:            2,
 		len:            1,
 		kind:           SettingKindByte,
-		show:           SettingShowDec,
-		title:          "Output Mode",
+		show:           SettingShowTitles,
+		title:          "Hit Mode",
+		valueTitles:    []string{"Pass", "Custom", "Shake"},
 		positionOffset: 20,
+	})
+
+	d.settings = append(d.settings, Setting{
+		address:         85,
+		value:           []byte{d.eeprom[85]},
+		min:             1,
+		max:             120,
+		len:             1,
+		kind:            SettingKindByte,
+		show:            SettingShowDec,
+		title:           "Hit Time",
+		valueOffset:     0,
+		valueMultiplier: 200,
+		positionOffset:  20,
+	})
+
+	d.settings = append(d.settings, Setting{
+		address:         86,
+		value:           []byte{d.eeprom[86]},
+		min:             0,
+		max:             24,
+		len:             1,
+		kind:            SettingKindByte,
+		show:            SettingShowDec,
+		title:           "Custom",
+		valueOffset:     900,
+		valueMultiplier: 50,
+		positionOffset:  20,
+	})
+
+	d.settings = append(d.settings, Setting{
+		address:         87,
+		value:           []byte{d.eeprom[87]},
+		min:             1,
+		max:             10,
+		len:             1,
+		kind:            SettingKindByte,
+		show:            SettingShowDec,
+		title:           "Shake Every",
+		valueOffset:     0,
+		valueMultiplier: 200,
+		positionOffset:  20,
+	})
+
+	d.settings = append(d.settings, Setting{
+		address:         88,
+		value:           []byte{d.eeprom[88]},
+		min:             1,
+		max:             12,
+		len:             1,
+		kind:            SettingKindByte,
+		show:            SettingShowDec,
+		title:           "Shake Level",
+		valueOffset:     0,
+		valueMultiplier: 50,
+		positionOffset:  20,
 	})
 
 	d.settings = append(d.settings, Setting{
@@ -409,18 +430,21 @@ func (d *Device) Set() error {
 	// send new config
 	serial.uart.WriteByte(0x74)
 	serial.uart.WriteByte(d.id)
-	serial.uart.WriteByte(1)
-	serial.uart.Write(d.eeprom)
-	crc := d.id + 1
+	serial.uart.WriteByte(EEPROMVersion)
+	checksum := d.id + EEPROMVersion
 	for i := 0; i < 110; i++ {
-		crc += d.eeprom[i]
+		serial.uart.WriteByte(d.eeprom[i])
+		checksum += d.eeprom[i]
 	}
-	serial.uart.WriteByte(crc)
+	serial.uart.WriteByte(checksum)
 
 	if len(d.eepromPrev) == 0 {
 		d.eepromPrev = make([]byte, 110)
 	}
 	copy(d.eepromPrev, d.eeprom)
+
+	// id may have been changed
+	d.id = (d.eeprom[72] << 4) + d.eeprom[73]
 
 	// wait confirmation
 	err := d.Get(false)
