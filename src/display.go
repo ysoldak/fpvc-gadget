@@ -32,11 +32,19 @@ func (d *Display) Configure() {
 	d.device.ClearDisplay()
 }
 
+func (d *Display) Show() {
+	d.device.Display()
+}
+
+func (d *Display) Clear() {
+	d.device.ClearDisplay()
+}
+
 func (d *Display) Print(x, y int16, message string) {
 	tinyfont.WriteLineRotated(&d.device, &proggy.TinySZ8pt7b, x, y, message, WHITE, tinyfont.NO_ROTATION)
 }
 
-func (d *Display) Clear(x, y int16, message string) {
+func (d *Display) Erase(x, y int16, message string) {
 	tinyfont.WriteLineRotated(&d.device, &proggy.TinySZ8pt7b, x, y, message, BLACK, tinyfont.NO_ROTATION)
 }
 

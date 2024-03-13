@@ -20,4 +20,4 @@ flash-release:
 	cp ./releases/fpvc-gadget_xiao-ble_0.2.1.uf2 /Volumes/XIAO-SENSE/
 
 monitor:
-	tinygo flash $(LD_FLAGS) -target=$(TARGET) -size=short -monitor ./src 
+	tinygo monitor -target=$(TARGET)

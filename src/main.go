@@ -13,8 +13,6 @@ var display *Display
 var serial *Serial
 var encoder *Encoder
 
-var scan *Scan
-
 func main() {
 
 	battery = NewBattery()
@@ -40,10 +38,10 @@ func main() {
 	encoder.Configure()
 	go encoder.Run()
 
-	scan = &Scan{}
-	// scan.devices = append(scan.devices, &Device{id: 0xB2, name: "Bob"})
-	// scan.devices = append(scan.devices, &Device{id: 0xD4, name: "Dude"})
+	scanPage := NewPageScan()
+	// scanPage.items = append(scanPage.items, &DeviceItem{Id: 0xA1, Name: "Alice", Firmware: "2.6.2", Hardware: "2.5"})
+	// scanPage.items = append(scanPage.items, &DeviceItem{Id: 0xB2, Name: "Bob", Firmware: "2.6.2", Hardware: "2.6"})
 
-	scan.Open()
+	scanPage.Enter()
 
 }
