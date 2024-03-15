@@ -12,10 +12,7 @@ type PageScan struct {
 
 func NewPageScan() *PageScan {
 	ps := &PageScan{
-		Page: Page{
-			Title: "Scanning...",
-			items: []Item{},
-		},
+		Page: *NewPage("Scanning..."),
 	}
 	ps.cycler = ps.Cycle
 	return ps
@@ -35,6 +32,25 @@ func (ps *PageScan) Cycle(iter int) {
 		display.Show()
 	}
 	ps.Receive()
+	ps.Cleanup()
+}
+
+// remove old devices
+func (ps *PageScan) Cleanup() {
+	for i, item := range ps.items {
+		di := item.(*DeviceItem)
+		if time.Since(di.lastSeen) > 10*time.Second {
+			fmt.Printf("Scan: - %X | %s | %s | %s\r\n", di.Id, di.Name, di.Firmware, di.Hardware)
+			ps.items = append(ps.items[:i], ps.items[i+1:]...)
+			ps.redraw = true
+		}
+	}
+	if ps.cursor >= len(ps.items) {
+		ps.cursor = len(ps.items) - 1
+	}
+	if ps.cursor < 0 {
+		ps.cursor = 0
+	}
 }
 
 func (ps *PageScan) Receive() {
@@ -88,20 +104,6 @@ func (ps *PageScan) Receive() {
 		ps.redraw = true
 	}
 	fmt.Printf("Scan: + %X | %s | %s | %s\r\n", device.Id, device.Name, device.Firmware, device.Hardware)
-
-	// remove old devices
-	for i, item := range ps.items {
-		di := item.(*DeviceItem)
-		if time.Since(di.lastSeen) > 10*time.Second {
-			fmt.Printf("Scan: - %X | %s | %s | %s\r\n", di.Id, di.Name, di.Firmware, di.Hardware)
-			ps.items = append(ps.items[:i], ps.items[i+1:]...)
-			ps.redraw = true
-		}
-	}
-	if ps.cursor >= len(ps.items) {
-		ps.cursor = len(ps.items) - 1
-	}
-
 }
 
 // ----------------------------

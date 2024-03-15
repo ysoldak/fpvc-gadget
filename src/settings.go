@@ -9,8 +9,6 @@ import (
 const SettingsVersion = 2
 
 const (
-	S_LIFE = 70
-	S_AMMO = 71
 	S_TEAM = 72
 )
 
@@ -125,7 +123,6 @@ func (s *Settings) Push() error {
 	err := s.Read()
 	if err != nil {
 		display.Erase(120, 60, "*")
-		display.Print(120, 60, "?") // network error
 		display.Show()
 		return err
 	}
@@ -133,7 +130,6 @@ func (s *Settings) Push() error {
 	for i := 0; i < 110; i++ {
 		if buf[i+2] != s.data[i] {
 			display.Erase(120, 60, "*")
-			display.Print(120, 60, "!") // data mismatch, probably failed to set or rejected
 			display.Show()
 			return ErrSetFailed
 		}
@@ -181,8 +177,21 @@ func (s *Settings) Commit() error {
 		}
 	}
 	if needsPush {
+		tmp := make([]byte, 110)
+		copy(tmp, s.data)
 		copy(s.data, s.dirtyData)
-		return s.Push()
+		err := s.Push()
+		attempts := 3
+		for err != nil && attempts > 0 {
+			println(err.Error())
+			err = s.Push()
+			attempts--
+		}
+		if err != nil {
+			copy(s.data, tmp)      // restore old data
+			copy(s.dirtyData, tmp) // restore old data
+			return err
+		}
 	}
 	return nil
 }

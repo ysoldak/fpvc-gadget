@@ -27,6 +27,8 @@ type Page struct {
 	clicked bool
 
 	cycler func(iter int)
+
+	lastChange time.Time
 }
 
 func NewPage(title string) *Page {
@@ -105,7 +107,9 @@ func (p *Page) Draw() {
 		}
 		item.Draw(i - p.offset)
 	}
-	display.Print(0, pageBodyOffset+int16(p.cursor-p.offset)*pageRowHeight, ">")
+	if len(p.items) > 0 {
+		display.Print(0, pageBodyOffset+int16(p.cursor-p.offset)*pageRowHeight, ">")
+	}
 	display.Show()
 }
 
@@ -120,6 +124,10 @@ func (p *Page) HandleChange(value int) int {
 	if len(p.items) == 0 {
 		return 0
 	}
+	if time.Since(p.lastChange) < 100*time.Millisecond {
+		return p.cursor
+	}
+	p.lastChange = time.Now()
 	// s.cursorPrev = s.cursor
 	display.Erase(0, pageBodyOffset+int16(p.cursor-p.offset)*pageRowHeight, ">")
 

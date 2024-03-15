@@ -28,6 +28,10 @@ func (e *Encoder) Configure() {
 	machine.D0.Configure(machine.PinConfig{Mode: machine.PinInputPullup})
 }
 
+func (e *Encoder) SetValue(value int) {
+	e.device.SetValue(value)
+}
+
 func (e *Encoder) SetClickHandler(handler func()) {
 	e.clickHandler = handler
 	machine.D0.SetInterrupt(machine.PinRising, nil)
