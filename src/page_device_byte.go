@@ -85,6 +85,8 @@ func (si *ItemByte) HandleClick() {
 
 func (si *ItemByte) HandleChange(value int) int {
 	eValue := si.ItemValuer.getValue(si.address)
+	diff := (value - int(eValue)) * int(si.inc)
+	value = int(eValue) + diff
 	if value < int(si.min) {
 		value = int(si.max)
 	}
