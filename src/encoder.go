@@ -28,19 +28,26 @@ func (e *Encoder) Configure() {
 	machine.D0.Configure(machine.PinConfig{Mode: machine.PinInputPullup})
 }
 
+func (e *Encoder) SetValue(value int) {
+	e.device.SetValue(value)
+}
+
 func (e *Encoder) SetClickHandler(handler func()) {
 	e.clickHandler = handler
 	machine.D0.SetInterrupt(machine.PinRising, nil)
+	if handler == nil {
+		return
+	}
 	machine.D0.SetInterrupt(machine.PinRising, func(machine.Pin) {
-		if time.Since(e.lastClick) > 100*time.Millisecond {
+		if time.Since(e.lastClick) > 100*time.Millisecond && e.clickHandler != nil {
 			e.clickHandler()
 		}
 		e.lastClick = time.Now()
 	})
 }
 
-func (e *Encoder) SetChangeHandler(handler func(value int) int) {
-	e.device.SetValue(0)
+func (e *Encoder) SetChangeHandler(handler func(value int) int, initValue int) {
+	e.device.SetValue(initValue)
 	e.changeHandler = handler
 }
 
@@ -62,4 +69,9 @@ func (e *Encoder) Run() {
 		oldValue = newValue
 	}
 
+}
+
+func (e *Encoder) ClearHandlers() {
+	e.SetClickHandler(func() {})
+	e.SetChangeHandler(func(int) int { return 0 }, 0)
 }
