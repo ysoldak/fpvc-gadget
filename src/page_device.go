@@ -96,20 +96,13 @@ func (pd *PageDevice) ItemsFromSettings() []Item {
 	items = append(items, NewItemByte("Info Leds", 92, 0, 50, 2))
 	items = append(items, NewItemByte("Voltage", 93, 1, 255, 1))
 
-	if strings.Contains(pd.device.Hardware, "2.5") {
-		if strings.HasPrefix(pd.device.Firmware, "2.7") {
-			items = append(items, NewItemByte("HC12 Pins", 94, 0, 2, 1).WithDrawer(NewNamesDrawer("Off", "Network", "MSP Out")).WithValuer(&BitsValuer{0b00000011}))
-			items = append(items, NewItemByte("I2C  Pins", 94, 0, 1, 1).WithDrawer(NewNamesDrawer("I2C", "Network")).WithValuer(&BitsValuer{0b00110000}))
-		}
-	}
-
 	if strings.Contains(pd.device.Hardware, "2.6") {
 		if strings.HasPrefix(pd.device.Firmware, "2.7") {
-			items = append(items, NewItemByte("HC12 Pins", 94, 0, 3, 1).WithDrawer(NewNamesDrawer("Off", "Network", "MSP Out", "MSP In")).WithValuer(&BitsValuer{0b00000011}))
-			items = append(items, NewItemByte("I2C  Pins", 94, 0, 1, 1).WithDrawer(NewNamesDrawer("I2C", "Network")).WithValuer(&BitsValuer{0b00110000}))
-			items = append(items, NewItemByte("MSP  Pins", 94, 0, 3, 1).WithDrawer(NewNamesDrawer("Auto", "Off", "MSP Out", "MSP In")).WithValuer(&BitsValuer{0b00001100}))
+			items = append(items, NewItemByte("HC12 Pins", 94, 0, 3, 1).WithDrawer(NewNamesDrawer("Off", "CSP", "MSP AU", "MSP FC")).WithValuer(&BitsValuer{0b00000011}))
+			items = append(items, NewItemByte("I2C  Pins", 94, 0, 1, 1).WithDrawer(NewNamesDrawer("I2C", "CSP")).WithValuer(&BitsValuer{0b00110000}))
+			items = append(items, NewItemByte("MSP  Pins", 94, 0, 3, 1).WithDrawer(NewNamesDrawer("Auto", "Off", "MSP AU", "MSP FC")).WithValuer(&BitsValuer{0b00001100}))
 		} else {
-			items = append(items, NewItemByte("MSP  Pins", 94, 0, 2, 1).WithDrawer(NewNamesDrawer("Auto", "Off", "MSP Out")).WithValuer(&BitsValuer{0b00001100}))
+			items = append(items, NewItemByte("MSP  Pins", 94, 0, 2, 1).WithDrawer(NewNamesDrawer("Auto", "Off", "MSP AU")).WithValuer(&BitsValuer{0b00001100}))
 		}
 	}
 	return items
