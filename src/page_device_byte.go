@@ -73,7 +73,11 @@ func (si *ItemByte) Enter() {
 		}
 		time.Sleep(10 * time.Millisecond)
 	}
+	display.Print(120, 60, "*")
+	display.Show()
 	err := settings.Commit()
+	display.Erase(120, 60, "*")
+	display.Show()
 	if err != nil {
 		println(err.Error())
 	}

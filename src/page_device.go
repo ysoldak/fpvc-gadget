@@ -36,7 +36,11 @@ func (pd *PageDevice) Enter() {
 	display.Show()
 
 	// Do fetch
+	display.Print(120, 60, "*")
+	display.Show()
 	err := settings.Fetch(pd.id)
+	display.Erase(120, 60, "*")
+	display.Show()
 	if err != nil {
 		display.Fill(10, 24+10, 128, 20, BLACK)
 		display.Print(10, 24+20, err.Error())

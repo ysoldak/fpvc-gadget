@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"fpvc-gadget/src/csp"
 	"machine"
 	"time"
 )
@@ -10,16 +11,18 @@ var Version string
 
 var battery *Battery
 var display *Display
-var serial *Serial
+
 var encoder *Encoder
+var network *csp.Adapter
 
 func main() {
 
 	battery = NewBattery()
 	battery.Configure()
 
-	serial = NewSerial(machine.UART0, machine.D7, machine.D6)
+	serial := NewSerial(machine.UART0, machine.D7, machine.D6)
 	serial.Configure()
+	network = csp.NewAdapter(serial.uart)
 
 	display = &Display{}
 	display.Configure()
