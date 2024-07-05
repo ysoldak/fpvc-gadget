@@ -61,6 +61,7 @@ func (pd *PageDevice) ItemsFromSettings() []Item {
 	items := []Item{}
 	items = append(items, NewItemSimple("- BATTLE ---------"))
 	items = append(items, NewItemByte("Team", 72, 0x0A, 0x0E, 1).WithDrawer(&TeamNameDrawer{}))
+	items = append(items, NewItemByte("Player", 73, 1, 9, 1))
 	items = append(items, NewItemByte("Life", 70, 1, 255, 1))
 	items = append(items, NewItemByte("Ammo", 71, 1, 255, 1))
 	items = append(items, NewItemByte("Shoot Power", 75, 1, 10-settings.Get(76)-settings.Get(77), 1))
