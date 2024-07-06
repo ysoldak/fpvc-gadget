@@ -34,26 +34,31 @@ var settings = Settings{
 }
 
 func (s *Settings) Fetch(id byte) error {
-	fmt.Printf("Settings: fetch %X\r\n", id)
+	fmt.Printf("Settings: Fetch %X\r\n", id)
 
-	network.Reset()
 	s.id = id
 
 	request := csp.NewMessage(csp.COMMAND_CFG_GET_REQ, []byte{id})
+	network.Reset()
 	err := network.Send(request)
 	if err != nil {
+		println("Settings: Fetch Send error ", err.Error())
 		return err
 	}
 
-	timeout := time.Now().Add(5 * time.Second)
+	timeout := time.Now().Add(1 * time.Second)
 	for time.Now().Before(timeout) {
-		response, _ := network.Receive()
+		response, err := network.Receive()
+		if err != nil && err != csp.ErrNoData {
+			println("Settings: Fetch Receive error ", err.Error())
+			return err
+		}
 		if response == nil {
 			continue
 		}
-		if response.Command == csp.COMMAND_CFG_GET_RSP {
-			copy(s.data, response.Data)
-			copy(s.dirtyData, response.Data)
+		if response.Command == csp.COMMAND_CFG_GET_RSP && response.Payload[0] == id {
+			copy(s.data, response.Payload[1:])
+			copy(s.dirtyData, response.Payload[1:])
 			return nil
 		}
 	}
@@ -73,35 +78,41 @@ func (s *Settings) Commit() error {
 	if !needsPush {
 		return nil
 	}
-	dataToSend := make([]byte, 111)
+	dataToSend := make([]byte, 1+110)
 	dataToSend[0] = s.id
 	copy(dataToSend[1:], s.dirtyData)
 
 	request := csp.NewMessage(csp.COMMAND_CFG_SET_REQ, dataToSend)
 
-	for attempts := 0; attempts < 3; attempts++ {
+	for attempts := 0; attempts < 1; attempts++ {
+		network.Reset()
 		err := network.Send(request)
 		if err != nil {
+			println("Settings: Commit Send error ", err.Error())
 			continue
 		}
-		timeout := time.Now().Add(2 * time.Second)
+		timeout := time.Now().Add(1 * time.Second)
 		var response *csp.Message
 		for time.Now().Before(timeout) {
-			response, _ = network.Receive()
+			response, err = network.Receive()
+			if err != nil && err != csp.ErrNoData {
+				println("Settings: Commit Receive error ", err.Error())
+			}
 			if response == nil {
 				continue
 			}
 		}
 		if response == nil {
+			println("Settings: commit receive timeout")
 			continue
 		}
 		if response.Command == csp.COMMAND_CFG_SET_RSP {
 			id := (s.dirtyData[S_TEAM] << 4) + s.dirtyData[S_PLAYER]
-			if id != response.Data[0] {
+			if id != response.Payload[0] {
 				return ErrSetFailed
 			}
 			for i := 1; i < 111; i++ {
-				if dataToSend[i] != response.Data[i] {
+				if dataToSend[i] != response.Payload[i] {
 					return ErrSetFailed
 				}
 			}

@@ -1,5 +1,7 @@
 package csp
 
+const MAX_PAYLOAD = 111
+
 // Commands
 const (
 	COMMAND_BEACON byte = 0x71 // ID[1], Name[10], Description[20]
@@ -15,10 +17,10 @@ const (
 
 type Message struct {
 	Header   [2]byte // '$' + 'C'
-	Length   byte    // Length of the data
+	Length   byte    // Length of the payload
 	Command  byte    // 0x82 = Claim, 0x83 = Hit, etc
-	Data     []byte  // Data
-	Checksum byte    // XOR of all bytes from length to the end of data
+	Payload  []byte  // Data
+	Checksum byte    // XOR of all bytes from length to the end of payload
 }
 
 func NewMessage(command byte, data []byte) *Message {
@@ -30,18 +32,18 @@ func NewMessage(command byte, data []byte) *Message {
 		Header:   [2]byte{'$', 'C'},
 		Length:   byte(len(data)),
 		Command:  command,
-		Data:     data,
+		Payload:  data,
 		Checksum: checksum,
 	}
 }
 
 func (m *Message) Bytes() []byte {
-	b := make([]byte, 4+len(m.Data)+1)
+	b := make([]byte, 4+len(m.Payload)+1)
 	b[0] = m.Header[0]
 	b[1] = m.Header[1]
 	b[2] = m.Length
 	b[3] = m.Command
-	copy(b[4:], m.Data)
+	copy(b[4:], m.Payload)
 	b[len(b)-1] = m.Checksum
 	return b
 }

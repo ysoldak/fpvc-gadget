@@ -67,15 +67,15 @@ func (ps *PageScan) Receive() {
 		device := &DeviceItem{}
 		for _, item := range ps.items {
 			di := item.(*DeviceItem)
-			if di.Id == message.Data[0] {
+			if di.Id == message.Payload[0] {
 				new = false
 				device = di
 				break
 			}
 		}
-		device.Id = message.Data[0]
-		device.Name = string(message.Data[1:11])
-		desc := message.Data[11:]
+		device.Id = message.Payload[0]
+		device.Name = string(message.Payload[1:11])
+		desc := message.Payload[11:]
 		device.Firmware = strings.TrimSpace(strings.Split(string(desc), " ")[0])
 		device.Hardware = strings.TrimSpace(strings.Split(string(desc), " ")[1])
 		device.lastSeen = time.Now()
