@@ -57,7 +57,11 @@ func (is *ItemString) Enter() {
 		}
 		time.Sleep(10 * time.Millisecond)
 	}
-	err := settings.Commit()
+	display.Print(120, 60, "*")
+	display.Show()
+	err := settings.Commit(is.address, is.length)
+	display.Erase(120, 60, "*")
+	display.Show()
 	if err != nil {
 		println(err.Error())
 	}

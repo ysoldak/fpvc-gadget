@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"fpvc-gadget/src/csp"
 	"strings"
 	"time"
 )
@@ -20,10 +21,6 @@ func NewPageScan() *PageScan {
 
 func (ps *PageScan) Cycle(iter int) {
 	if iter%500 == 0 { // every 5 sec
-		err := serial.uart.WriteByte(0x70)
-		if err != nil {
-			println(err.Error())
-		}
 		display.Print(120, 60, "*")
 		display.Show()
 	}
@@ -39,7 +36,7 @@ func (ps *PageScan) Cycle(iter int) {
 func (ps *PageScan) Cleanup() {
 	for i, item := range ps.items {
 		di := item.(*DeviceItem)
-		if time.Since(di.lastSeen) > 10*time.Second {
+		if time.Since(di.lastSeen) > 12*time.Second {
 			fmt.Printf("Scan: - %X | %s | %s | %s\r\n", di.Id, di.Name, di.Firmware, di.Hardware)
 			ps.items = append(ps.items[:i], ps.items[i+1:]...)
 			ps.redraw = true
@@ -54,56 +51,41 @@ func (ps *PageScan) Cleanup() {
 }
 
 func (ps *PageScan) Receive() {
-	if serial.uart.Buffered() < 32 {
-		return
-	}
-	key := byte(0)
-	name := make([]byte, 10)
-	desc := make([]byte, 20)
-	for i := 0; i < 32; i++ {
-		b, err := serial.uart.ReadByte()
-		if err != nil {
+
+	for {
+		message, err := network.Receive()
+		if err != nil && err == csp.ErrNoData {
 			return
 		}
-		switch {
-		case i == 0:
-			// fmt.Printf("Receiving %X\n", b)
-			if !(0xA0 < b && b < 0xFF) {
-				return
-			}
-			key = b
-		case 1 < i && i < 12:
-			if b == 0x2F {
-				b = 0x20
-			}
-			name[i-2] = b
-		case 11 < i && i < 32:
-			if b == 0x2F {
-				b = 0x20
-			}
-			desc[i-12] = b
+		if err != nil {
+			continue
 		}
-	}
-	new := true
-	device := &DeviceItem{}
-	for _, item := range ps.items {
-		di := item.(*DeviceItem)
-		if di.Id == key {
-			new = false
-			device = di
-			break
+		if message.Command != csp.COMMAND_BEACON {
+			continue
 		}
+		new := true
+		device := &DeviceItem{}
+		for _, item := range ps.items {
+			di := item.(*DeviceItem)
+			if di.Id == message.Payload[0] {
+				new = false
+				device = di
+				break
+			}
+		}
+		device.Id = message.Payload[0]
+		device.Name = string(message.Payload[1:11])
+		desc := message.Payload[11:]
+		device.Firmware = strings.TrimSpace(strings.Split(string(desc), " ")[0])
+		device.Hardware = strings.TrimSpace(strings.Split(string(desc), " ")[1])
+		device.lastSeen = time.Now()
+		if new {
+			ps.items = append(ps.items, device)
+			ps.redraw = true
+		}
+		fmt.Printf("Scan: + %X | %s | %s | %s\r\n", device.Id, device.Name, device.Firmware, device.Hardware)
 	}
-	device.Id = key
-	device.Name = string(name)
-	device.Firmware = strings.TrimSpace(strings.Split(string(desc), " ")[0])
-	device.Hardware = strings.TrimSpace(strings.Split(string(desc), " ")[1])
-	device.lastSeen = time.Now()
-	if new {
-		ps.items = append(ps.items, device)
-		ps.redraw = true
-	}
-	fmt.Printf("Scan: + %X | %s | %s | %s\r\n", device.Id, device.Name, device.Firmware, device.Hardware)
+
 }
 
 // ----------------------------

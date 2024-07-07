@@ -36,7 +36,11 @@ func (pd *PageDevice) Enter() {
 	display.Show()
 
 	// Do fetch
+	display.Print(120, 60, "*")
+	display.Show()
 	err := settings.Fetch(pd.id)
+	display.Erase(120, 60, "*")
+	display.Show()
 	if err != nil {
 		display.Fill(10, 24+10, 128, 20, BLACK)
 		display.Print(10, 24+20, err.Error())
@@ -61,11 +65,12 @@ func (pd *PageDevice) ItemsFromSettings() []Item {
 	items := []Item{}
 	items = append(items, NewItemSimple("- BATTLE ---------"))
 	items = append(items, NewItemByte("Team", 72, 0x0A, 0x0E, 1).WithDrawer(&TeamNameDrawer{}))
+	items = append(items, NewItemByte("Player", 73, 1, 9, 1))
 	items = append(items, NewItemByte("Life", 70, 1, 255, 1))
 	items = append(items, NewItemByte("Ammo", 71, 1, 255, 1))
 	items = append(items, NewItemByte("Shoot Power", 75, 1, 10-settings.Get(76)-settings.Get(77), 1))
 	items = append(items, NewItemByte("Shoot Rate", 76, 1, 10-settings.Get(75)-settings.Get(77), 1))
-	items = append(items, NewItemByte("Defense", 77, 1, 10-settings.Get(75)-settings.Get(76), 1))
+	items = append(items, NewItemByte("Armor", 77, 1, 10-settings.Get(75)-settings.Get(76), 1))
 	items = append(items, NewItemSimple("- DISPLAY --------"))
 	items = append(items, NewItemString("Name", 100, 10))
 	items = append(items, NewItemByte("Canvas", 95, 0, 4, 1).WithDrawer(NewNamesDrawer("30x16", "50x18", "30x16C", "60x22", "53x20")).WithValuer(&BitsValuer{0b00011100}))
