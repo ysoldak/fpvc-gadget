@@ -38,7 +38,7 @@ func (s *Settings) Fetch(id byte) error {
 
 	s.id = id
 
-	request := csp.NewMessage(csp.COMMAND_CFG_GET_REQ, []byte{id})
+	request := csp.NewMessage(csp.COMMAND_CFG_GET_REQ, []byte{id, 0, 110})
 	network.Reset()
 	err := network.Send(request)
 	if err != nil {
@@ -57,8 +57,8 @@ func (s *Settings) Fetch(id byte) error {
 			continue
 		}
 		if response.Command == csp.COMMAND_CFG_GET_RSP && response.Payload[0] == id {
-			copy(s.data, response.Payload[1:])
-			copy(s.dirtyData, response.Payload[1:])
+			copy(s.data, response.Payload[2:]) // skip id and offset
+			copy(s.dirtyData, response.Payload[2:])
 			return nil
 		}
 	}
@@ -66,21 +66,23 @@ func (s *Settings) Fetch(id byte) error {
 	return ErrTimeout
 }
 
-func (s *Settings) Commit() error {
-	println("Settings: commit")
+func (s *Settings) Commit(offset, length byte) error {
+	println("Settings: Commit")
 	needsPush := false
-	for i := 0; i < 110; i++ {
-		if s.dirtyData[i] != s.data[i] {
+	for i := byte(0); i < length; i++ {
+		if s.dirtyData[offset+i] != s.data[offset+i] {
 			needsPush = true
 			break
 		}
 	}
 	if !needsPush {
+		println("Settings: Commit no changes")
 		return nil
 	}
-	dataToSend := make([]byte, 1+110)
+	dataToSend := make([]byte, 1+1+length)
 	dataToSend[0] = s.id
-	copy(dataToSend[1:], s.dirtyData)
+	dataToSend[1] = offset
+	copy(dataToSend[2:], s.dirtyData[offset:offset+length])
 
 	request := csp.NewMessage(csp.COMMAND_CFG_SET_REQ, dataToSend)
 
@@ -88,7 +90,7 @@ func (s *Settings) Commit() error {
 		network.Reset()
 		err := network.Send(request)
 		if err != nil {
-			println("Settings: Commit Send error ", err.Error())
+			println("Settings: Commit send error ", err.Error())
 			continue
 		}
 		timeout := time.Now().Add(1 * time.Second)
@@ -96,28 +98,28 @@ func (s *Settings) Commit() error {
 		for time.Now().Before(timeout) {
 			response, err = network.Receive()
 			if err != nil && err != csp.ErrNoData {
-				println("Settings: Commit Receive error ", err.Error())
+				println("Settings: Commit receive error ", err.Error())
 			}
-			if response == nil {
-				continue
+			if response != nil {
+				break
 			}
 		}
 		if response == nil {
-			println("Settings: commit receive timeout")
+			println("Settings: Commit receive timeout")
 			continue
 		}
 		if response.Command == csp.COMMAND_CFG_SET_RSP {
-			id := (s.dirtyData[S_TEAM] << 4) + s.dirtyData[S_PLAYER]
+			id := (s.dirtyData[S_TEAM] << 4) | s.dirtyData[S_PLAYER]
 			if id != response.Payload[0] {
 				return ErrSetFailed
 			}
-			for i := 1; i < 111; i++ {
+			for i := byte(1); i < length; i++ {
 				if dataToSend[i] != response.Payload[i] {
 					return ErrSetFailed
 				}
 			}
 			s.id = id
-			copy(s.data, s.dirtyData)
+			copy(s.data[offset:offset+length], s.dirtyData[offset:offset+length])
 			return nil
 		}
 	}

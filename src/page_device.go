@@ -70,7 +70,7 @@ func (pd *PageDevice) ItemsFromSettings() []Item {
 	items = append(items, NewItemByte("Ammo", 71, 1, 255, 1))
 	items = append(items, NewItemByte("Shoot Power", 75, 1, 10-settings.Get(76)-settings.Get(77), 1))
 	items = append(items, NewItemByte("Shoot Rate", 76, 1, 10-settings.Get(75)-settings.Get(77), 1))
-	items = append(items, NewItemByte("Defense", 77, 1, 10-settings.Get(75)-settings.Get(76), 1))
+	items = append(items, NewItemByte("Armor", 77, 1, 10-settings.Get(75)-settings.Get(76), 1))
 	items = append(items, NewItemSimple("- DISPLAY --------"))
 	items = append(items, NewItemString("Name", 100, 10))
 	items = append(items, NewItemByte("Canvas", 95, 0, 4, 1).WithDrawer(NewNamesDrawer("30x16", "50x18", "30x16C", "60x22", "53x20")).WithValuer(&BitsValuer{0b00011100}))

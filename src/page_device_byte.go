@@ -43,39 +43,39 @@ func NewItemByte(title string, address, min, max, inc byte) *ItemByte {
 	}
 }
 
-func (si *ItemByte) WithDrawer(drawer ItemDrawer) *ItemByte {
-	si.ItemDrawer = drawer
-	return si
+func (ib *ItemByte) WithDrawer(drawer ItemDrawer) *ItemByte {
+	ib.ItemDrawer = drawer
+	return ib
 }
 
-func (si *ItemByte) WithValuer(valuer ItemValuer) *ItemByte {
-	si.ItemValuer = valuer
-	return si
+func (ib *ItemByte) WithValuer(valuer ItemValuer) *ItemByte {
+	ib.ItemValuer = valuer
+	return ib
 }
 
-func (si *ItemByte) Draw(row int) {
-	si.row = row
+func (ib *ItemByte) Draw(row int) {
+	ib.row = row
 	display.Fill(20, pageBodyOffset+int16(row)*pageRowHeight-8, 100, 10, BLACK)
-	si.ItemDrawer.Draw(row, si)
+	ib.ItemDrawer.Draw(row, ib)
 }
 
-func (si *ItemByte) Enter() {
-	si.editing = true
-	encoder.SetClickHandler(si.HandleClick)
-	encoder.SetChangeHandler(si.HandleChange, int(si.getValue(si.address)))
-	display.Print(120, pageBodyOffset+int16(si.row)*pageRowHeight, "<")
+func (ib *ItemByte) Enter() {
+	ib.editing = true
+	encoder.SetClickHandler(ib.HandleClick)
+	encoder.SetChangeHandler(ib.HandleChange, int(ib.getValue(ib.address)))
+	display.Print(120, pageBodyOffset+int16(ib.row)*pageRowHeight, "<")
 	display.Show()
-	for si.editing {
-		if si.changed {
-			si.changed = false
-			si.Draw(si.row)
+	for ib.editing {
+		if ib.changed {
+			ib.changed = false
+			ib.Draw(ib.row)
 			display.Show()
 		}
 		time.Sleep(10 * time.Millisecond)
 	}
 	display.Print(120, 60, "*")
 	display.Show()
-	err := settings.Commit()
+	err := settings.Commit(ib.address, 1)
 	display.Erase(120, 60, "*")
 	display.Show()
 	if err != nil {
@@ -83,22 +83,22 @@ func (si *ItemByte) Enter() {
 	}
 }
 
-func (si *ItemByte) HandleClick() {
-	si.editing = false
+func (ib *ItemByte) HandleClick() {
+	ib.editing = false
 }
 
-func (si *ItemByte) HandleChange(value int) int {
-	eValue := si.ItemValuer.getValue(si.address)
-	diff := (value - int(eValue)) * int(si.inc)
+func (ib *ItemByte) HandleChange(value int) int {
+	eValue := ib.ItemValuer.getValue(ib.address)
+	diff := (value - int(eValue)) * int(ib.inc)
 	value = int(eValue) + diff
-	if value < int(si.min) {
-		value = int(si.max)
+	if value < int(ib.min) {
+		value = int(ib.max)
 	}
-	if value > int(si.max) {
-		value = int(si.min)
+	if value > int(ib.max) {
+		value = int(ib.min)
 	}
-	si.ItemValuer.setValue(si.address, byte(value))
-	si.changed = eValue != byte(value)
+	ib.ItemValuer.setValue(ib.address, byte(value))
+	ib.changed = eValue != byte(value)
 	return value
 }
 

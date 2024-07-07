@@ -1,15 +1,15 @@
 package csp
 
-const MAX_PAYLOAD = 111
+const MAX_PAYLOAD = 1 + 1 + 110 // CFG SET requests: ID, Offset, Data
 
 // Commands
 const (
 	COMMAND_BEACON byte = 0x71 // ID[1], Name[10], Description[20]
 
-	COMMAND_CFG_GET_REQ byte = 0x72 // ID[1]
-	COMMAND_CFG_GET_RSP byte = 0x73 // ID[1], Data[110]
-	COMMAND_CFG_SET_REQ byte = 0x74 // ID[1], Data[110]
-	COMMAND_CFG_SET_RSP byte = 0x75 // ID[1], Data[110]
+	COMMAND_CFG_GET_REQ byte = 0x72 // ID[1], Offset[1], Length[1]
+	COMMAND_CFG_GET_RSP byte = 0x73 // ID[1], Offset[1], Data[<=110]
+	COMMAND_CFG_SET_REQ byte = 0x74 // ID[1], Offset[1], Data[<=110] <-- data length = message payload length - 2
+	COMMAND_CFG_SET_RSP byte = 0x75 // ID[1], Offset[1], Data[<=110] <-- ID[1] can be new if team or player changed
 
 	COMMAND_HIT   byte = 0x82 // ID[1], Lives[1]
 	COMMAND_CLAIM byte = 0x84 // ID[1], Power[1]

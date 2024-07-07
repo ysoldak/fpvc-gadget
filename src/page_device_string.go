@@ -59,7 +59,7 @@ func (is *ItemString) Enter() {
 	}
 	display.Print(120, 60, "*")
 	display.Show()
-	err := settings.Commit()
+	err := settings.Commit(is.address, is.length)
 	display.Erase(120, 60, "*")
 	display.Show()
 	if err != nil {
