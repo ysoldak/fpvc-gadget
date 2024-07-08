@@ -2,12 +2,7 @@
 
 DIY device (gadget) that helps you quickly adjust [FPV Combat](https://www.fpv-combat.com) board settings like player ID, player name, lives, ammo and many more.
 
-<table>
-<tr>
-<td><img src="Gadget.png" title="Gadget to your service" height="300" /></td>
-<td><img src="media/GadgetWithFPVCBoard.jpg" height="300" /></td>
-</tr>
-</table>
+<img src="Gadget.png" title="Gadget to your service"  />
 
 This is an alternative to classic way of using IR remote and board's OSD.
 
@@ -18,6 +13,8 @@ You'll need to buy some electronic components and 3D print the case, see below.
 Soldering skills required.
 
 Note: FPV Combat board shall be flashed with [firmware v2.5.0 or later](https://github.com/FPV-Combat/Main_board_v2/releases).
+
+<img src="media/GadgetWithFPVCBoard.jpg" height="300" />
 
 ## Electronic Components
 
