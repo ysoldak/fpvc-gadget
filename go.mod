@@ -10,6 +10,6 @@ require (
 
 require github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 
-require github.com/ysoldak/fpvc-serial-protocol v1.0.0
+require github.com/ysoldak/fpvc-serial-protocol v1.1.1
 
-//replace github.com/ysoldak/fpvc-serial-protocol => ../fpvc-serial-protocol
+// replace github.com/ysoldak/fpvc-serial-protocol => ../fpvc-serial-protocol

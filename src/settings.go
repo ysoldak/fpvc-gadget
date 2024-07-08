@@ -50,28 +50,17 @@ func (s *Settings) Fetch(id byte) error {
 	}
 
 	// Wait for response
-	timeout := time.Now().Add(1 * time.Second)
-	for time.Now().Before(timeout) {
-		response, err := network.Receive()
-		if err != nil && err != csp.ErrNoData {
-			println("Settings: Fetch Receive error ", err.Error())
-			return err
-		}
-		// wait for correct message
-		if response == nil || response.Command != csp.CommandConfigGet || !response.IsResponse() {
-			continue
-		}
-		configGetResponse := csp.NewConfigGetResponseFromMessage(response)
-		if configGetResponse.ID != id {
-			continue
-		}
-		// extract changes and return
-		copy(s.data, configGetResponse.Data)
-		copy(s.dirtyData, configGetResponse.Data)
-		return nil
+	message, err := network.Wait(csp.CommandConfigGet, csp.DirResponse, 1*time.Second)
+	if err != nil {
+		return ErrTimeout
 	}
-
-	return ErrTimeout
+	configGetResponse := csp.NewConfigGetResponseFromMessage(message)
+	if configGetResponse.ID != id {
+		return ErrWrongId
+	}
+	copy(s.data, configGetResponse.Data)
+	copy(s.dirtyData, configGetResponse.Data)
+	return nil
 }
 
 func (s *Settings) Commit(offset, length byte) error {
@@ -101,32 +90,24 @@ func (s *Settings) Commit(offset, length byte) error {
 
 	// Wait for response
 	expectedID := (s.dirtyData[S_TEAM] << 4) | s.dirtyData[S_PLAYER] // ID may change if team or player number changes
-	timeout := time.Now().Add(1 * time.Second)
-	for time.Now().Before(timeout) {
-		response, err := network.Receive()
-		if err != nil && err != csp.ErrNoData {
-			println("Settings: Commit receive error ", err.Error())
-		}
-		// wait for correct message
-		if response == nil || response.Command != csp.CommandConfigSet || !response.IsResponse() {
-			continue
-		}
-		configSetResponse := csp.NewConfigSetResponseFromMessage(response)
-		if configSetResponse.ID != expectedID {
-			continue
-		}
-		// check if data was set correctly
-		for i := byte(0); i < length; i++ {
-			if s.dirtyData[offset+i] != configSetResponse.Data[i] {
-				return ErrSetFailed
-			}
-		}
-		// apply changes and return
-		s.id = expectedID
-		copy(s.data[offset:offset+length], s.dirtyData[offset:offset+length])
-		return nil
+	message, err := network.Wait(csp.CommandConfigSet, csp.DirResponse, 1*time.Second)
+	if err != nil {
+		return ErrSetFailed
 	}
-	return ErrSetFailed
+	configSetResponse := csp.NewConfigSetResponseFromMessage(message)
+	if configSetResponse.ID != expectedID {
+		return ErrSetFailed
+	}
+	// check if data was set correctly
+	for i := byte(0); i < length; i++ {
+		if s.dirtyData[offset+i] != configSetResponse.Data[i] {
+			return ErrSetFailed
+		}
+	}
+	// apply changes and return
+	s.id = expectedID
+	copy(s.data[offset:offset+length], s.dirtyData[offset:offset+length])
+	return nil
 }
 
 func (s *Settings) Get(address byte) byte {
