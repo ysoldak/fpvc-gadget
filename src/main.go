@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"fpvc-gadget/src/csp"
 	"machine"
 	"time"
+
+	csp "github.com/ysoldak/fpvc-serial-protocol"
 )
 
 var Version string
@@ -22,6 +23,7 @@ func main() {
 
 	serial := NewSerial(machine.UART0, machine.D7, machine.D6)
 	serial.Configure()
+	// csp.Logger = machine.Serial // debug serial communication
 	network = csp.NewAdapter(serial.uart)
 
 	display = &Display{}

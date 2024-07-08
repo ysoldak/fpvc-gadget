@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"fpvc-gadget/src/csp"
 	"strings"
 	"time"
+
+	csp "github.com/ysoldak/fpvc-serial-protocol"
 )
 
 type PageScan struct {
@@ -60,22 +61,23 @@ func (ps *PageScan) Receive() {
 		if err != nil {
 			continue
 		}
-		if message.Command != csp.COMMAND_BEACON {
+		if message.Command != csp.CommandBeacon {
 			continue
 		}
+		beacon := csp.NewBeaconFromMessage(message)
 		new := true
 		device := &DeviceItem{}
 		for _, item := range ps.items {
 			di := item.(*DeviceItem)
-			if di.Id == message.Payload[0] {
+			if di.Id == beacon.ID {
 				new = false
 				device = di
 				break
 			}
 		}
-		device.Id = message.Payload[0]
-		device.Name = string(message.Payload[1:11])
-		desc := message.Payload[11:]
+		device.Id = beacon.ID
+		device.Name = beacon.Name
+		desc := beacon.Description
 		device.Firmware = strings.TrimSpace(strings.Split(string(desc), " ")[0])
 		device.Hardware = strings.TrimSpace(strings.Split(string(desc), " ")[1])
 		device.lastSeen = time.Now()

@@ -1,6 +1,6 @@
 module fpvc-gadget
 
-go 1.22
+go 1.22.4
 
 require (
 	tinygo.org/x/drivers v0.27.0
@@ -9,3 +9,7 @@ require (
 )
 
 require github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
+
+require github.com/ysoldak/fpvc-serial-protocol v1.0.0
+
+//replace github.com/ysoldak/fpvc-serial-protocol => ../fpvc-serial-protocol

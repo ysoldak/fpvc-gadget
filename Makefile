@@ -11,7 +11,7 @@ clean:
 
 build:
 	@mkdir -p build
-	tinygo build $(LD_FLAGS) -target=$(TARGET) -size=short -o build/$(FILE) ./src
+	tinygo build $(LD_FLAGS) -target=$(TARGET) -size=full -o build/$(FILE) ./src
 
 flash:
 	tinygo flash $(LD_FLAGS) -target=$(TARGET) -size=short ./src

@@ -3,8 +3,9 @@ package main
 import (
 	"errors"
 	"fmt"
-	"fpvc-gadget/src/csp"
 	"time"
+
+	csp "github.com/ysoldak/fpvc-serial-protocol"
 )
 
 const (
@@ -38,14 +39,17 @@ func (s *Settings) Fetch(id byte) error {
 
 	s.id = id
 
-	request := csp.NewMessage(csp.COMMAND_CFG_GET_REQ, []byte{id, 0, 110})
-	network.Reset()
-	err := network.Send(request)
+	// Send request
+	network.Reset() // clear buffer expecting a response
+	request := csp.NewConfigGetRequest(id, 0, 110)
+	println("Settings: Fetch Send")
+	err := network.Send(request.Message())
 	if err != nil {
 		println("Settings: Fetch Send error ", err.Error())
 		return err
 	}
 
+	// Wait for response
 	timeout := time.Now().Add(1 * time.Second)
 	for time.Now().Before(timeout) {
 		response, err := network.Receive()
@@ -53,14 +57,18 @@ func (s *Settings) Fetch(id byte) error {
 			println("Settings: Fetch Receive error ", err.Error())
 			return err
 		}
-		if response == nil {
+		// wait for correct message
+		if response == nil || response.Command != csp.CommandConfigGet || !response.IsResponse() {
 			continue
 		}
-		if response.Command == csp.COMMAND_CFG_GET_RSP && response.Payload[0] == id {
-			copy(s.data, response.Payload[2:]) // skip id and offset
-			copy(s.dirtyData, response.Payload[2:])
-			return nil
+		configGetResponse := csp.NewConfigGetResponseFromMessage(response)
+		if configGetResponse.ID != id {
+			continue
 		}
+		// extract changes and return
+		copy(s.data, configGetResponse.Data)
+		copy(s.dirtyData, configGetResponse.Data)
+		return nil
 	}
 
 	return ErrTimeout
@@ -68,6 +76,8 @@ func (s *Settings) Fetch(id byte) error {
 
 func (s *Settings) Commit(offset, length byte) error {
 	println("Settings: Commit")
+
+	// Check if there are any changes
 	needsPush := false
 	for i := byte(0); i < length; i++ {
 		if s.dirtyData[offset+i] != s.data[offset+i] {
@@ -79,49 +89,42 @@ func (s *Settings) Commit(offset, length byte) error {
 		println("Settings: Commit no changes")
 		return nil
 	}
-	dataToSend := make([]byte, 1+1+length)
-	dataToSend[0] = s.id
-	dataToSend[1] = offset
-	copy(dataToSend[2:], s.dirtyData[offset:offset+length])
 
-	request := csp.NewMessage(csp.COMMAND_CFG_SET_REQ, dataToSend)
+	// Send request
+	network.Reset() // clear buffer expecting a response
+	request := csp.NewConfigSetRequest(s.id, offset, s.dirtyData[offset:offset+length])
+	err := network.Send(request.Message())
+	if err != nil {
+		println("Settings: Commit send error ", err.Error())
+		return ErrSetFailed
+	}
 
-	for attempts := 0; attempts < 1; attempts++ {
-		network.Reset()
-		err := network.Send(request)
-		if err != nil {
-			println("Settings: Commit send error ", err.Error())
+	// Wait for response
+	expectedID := (s.dirtyData[S_TEAM] << 4) | s.dirtyData[S_PLAYER] // ID may change if team or player number changes
+	timeout := time.Now().Add(1 * time.Second)
+	for time.Now().Before(timeout) {
+		response, err := network.Receive()
+		if err != nil && err != csp.ErrNoData {
+			println("Settings: Commit receive error ", err.Error())
+		}
+		// wait for correct message
+		if response == nil || response.Command != csp.CommandConfigSet || !response.IsResponse() {
 			continue
 		}
-		timeout := time.Now().Add(1 * time.Second)
-		var response *csp.Message
-		for time.Now().Before(timeout) {
-			response, err = network.Receive()
-			if err != nil && err != csp.ErrNoData {
-				println("Settings: Commit receive error ", err.Error())
-			}
-			if response != nil {
-				break
-			}
-		}
-		if response == nil {
-			println("Settings: Commit receive timeout")
+		configSetResponse := csp.NewConfigSetResponseFromMessage(response)
+		if configSetResponse.ID != expectedID {
 			continue
 		}
-		if response.Command == csp.COMMAND_CFG_SET_RSP {
-			id := (s.dirtyData[S_TEAM] << 4) | s.dirtyData[S_PLAYER]
-			if id != response.Payload[0] {
+		// check if data was set correctly
+		for i := byte(0); i < length; i++ {
+			if s.dirtyData[offset+i] != configSetResponse.Data[i] {
 				return ErrSetFailed
 			}
-			for i := byte(1); i < length; i++ {
-				if dataToSend[i] != response.Payload[i] {
-					return ErrSetFailed
-				}
-			}
-			s.id = id
-			copy(s.data[offset:offset+length], s.dirtyData[offset:offset+length])
-			return nil
 		}
+		// apply changes and return
+		s.id = expectedID
+		copy(s.data[offset:offset+length], s.dirtyData[offset:offset+length])
+		return nil
 	}
 	return ErrSetFailed
 }
