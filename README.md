@@ -1,8 +1,8 @@
 # FPV Combat Gadget
 
-DIY device (gadget) that helps you quickly adjust [FPV Combat](https://www.fpv-combat.com) board settings like player ID, player name, lives, ammo and many more.
-
 <img src="Gadget.png" title="Gadget to your service"  />
+
+DIY device (gadget) that helps you quickly adjust [FPV Combat](https://www.fpv-combat.com) board settings like player ID, player name, lives, ammo and many more.
 
 This is an alternative to classic way of using IR remote and board's OSD.
 
