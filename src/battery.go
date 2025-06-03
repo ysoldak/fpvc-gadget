@@ -24,6 +24,7 @@ func (b *Battery) Configure() {
 	b.pinRead.Configure(machine.PinConfig{Mode: machine.PinOutput})
 
 	// Battery sensor pin
+	machine.InitADC()
 	b.adc = machine.ADC{Pin: b.pinVoltage}
 	b.adc.Configure(machine.ADCConfig{})
 }
