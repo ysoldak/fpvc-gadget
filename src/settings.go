@@ -9,8 +9,34 @@ import (
 )
 
 const (
+	S_LIFE   = 70
+	S_AMMO   = 71
 	S_TEAM   = 72
 	S_PLAYER = 73
+
+	S_SHOOT_PWR   = 75
+	S_SHOOT_RATE  = 76
+	S_SHOOT_ARMOR = 77
+
+	S_E_ALIVE           = 80
+	S_E_ALIVE_CUSTOM    = 81
+	S_E_DEAD            = 82
+	S_E_DEAD_CUSTOM     = 83
+	S_E_HIT             = 84
+	S_E_HIT_DURATION    = 85
+	S_E_HIT_CUSTOM      = 86
+	S_E_HIT_SHAKE_EVERY = 87
+	S_E_HIT_SHAKE_LEVEL = 88
+
+	S_TEAM_LED = 91
+	S_INFO_LED = 92
+	S_VOLTAGE  = 93
+
+	S_PORTS   = 94
+	S_DIGITAL = 95
+	S_DEBUG   = 96
+
+	S_NAME = 100
 )
 
 var (
