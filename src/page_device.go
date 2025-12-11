@@ -105,7 +105,7 @@ func (pd *PageDevice) ItemsFromSettings() []Item {
 		items = append(items, NewItemByte("HC12 Pins", S_PORTS, 0, 2, 1).WithDrawer(NewNamesDrawer("OFF", "CSP", "MSP AU")).WithValuer(&BitsValuer{0b00000011}))
 		items = append(items, NewItemByte("I2C  Pins", S_PORTS, 0, 1, 1).WithDrawer(NewNamesDrawer("I2C", "CSP")).WithValuer(&BitsValuer{0b00110000}))
 	}
-	if strings.Contains(pd.device.Hardware, "2.6") {
+	if strings.Contains(pd.device.Hardware, "2.6") || strings.Contains(pd.device.Hardware, "2.7") {
 		items = append(items, NewItemByte("HC12 Pins", S_PORTS, 0, 3, 1).WithDrawer(NewNamesDrawer("OFF", "CSP", "MSP AU", "MSP FC")).WithValuer(&BitsValuer{0b00000011}))
 		items = append(items, NewItemByte("I2C  Pins", S_PORTS, 0, 1, 1).WithDrawer(NewNamesDrawer("I2C", "CSP")).WithValuer(&BitsValuer{0b00110000}))
 		items = append(items, NewItemByte("MSP  Pins", S_PORTS, 0, 3, 1).WithDrawer(NewNamesDrawer("AUTO", "OFF", "MSP AU", "MSP FC")).WithValuer(&BitsValuer{0b00001100}))
