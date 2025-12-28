@@ -12,7 +12,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/tinygo-org/tinygo:0.37.0
+      image: ghcr.io/tinygo-org/tinygo:0.40.1
       options: --user root
     steps:
 
